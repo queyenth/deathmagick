@@ -92,7 +92,7 @@ public:
    *
    * @return ссылку на Input
    */
-  const Input& GetInput() const;
+  Input& GetInput();
 
   /**
    * @return ссылку на Camera
