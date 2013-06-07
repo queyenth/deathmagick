@@ -60,12 +60,8 @@ void Input::UnPressKey(int key) {
  * @param key : код клавиши
  * @return True, если клавиша нажата, иначе false
  */
-bool Input::IsKeyPressed(int key) {
-  if (keys[key]) {
-    keys[key] = false;
-    return true;
-  }
-  return false;
+bool Input::IsKeyPressed(int key) const {
+  return keys[key];
 }
 
 /**

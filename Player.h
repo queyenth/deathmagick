@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Renderable.hpp"
+#include "PhysicsObject.h"
+#include "String.hpp"
 
-class Player : public se::Renderable {
+class Player : public PhysicsObject {
 public:
-  Player() {}
+  Player(int x, int y, unsigned int exp) : PhysicsObject(x, y), experience(exp) {}
   virtual ~Player() {}
 private:
-  void Render() const {}
   unsigned int experience;
 };

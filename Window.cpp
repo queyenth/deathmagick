@@ -262,7 +262,7 @@ void Window::Clear(Color color) {
  *
  * @return ссылку на Input
  */
-Input& Window::GetInput() {
+const Input& Window::GetInput() {
   return input;
 }
 

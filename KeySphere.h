@@ -20,6 +20,10 @@ public:
     return k1 + k2 + k3 == 3;
   }
 
+  int GetCount() {
+    return k1 + k2 + k3;
+  }
+
   void Clear() {
     k1 = k2 = k3 = 0;
   }

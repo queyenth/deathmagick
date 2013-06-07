@@ -43,7 +43,7 @@ public:
    * @param key : код клавиши
    * @return True, если клавиша нажата, иначе false
    */
-  bool IsKeyPressed(int);
+  bool IsKeyPressed(int) const;
 
   /**
    * @brief Изменяет состояние key, на нежатость (О_о)
