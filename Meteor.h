@@ -7,9 +7,7 @@
 class Meteor : public Skill {
 public:
   Meteor() : Skill() {
-    se::Image image;
-    image.LoadFromFile("img\\meteor.png");
-    SetImage(image);
+
   }
 
   virtual ~Meteor() {
@@ -17,8 +15,11 @@ public:
   }
 
   void Cast(Player &player) {
+    image.LoadFromFile("img\\meteor.jpg");
+    SetImage(image);
+    SetColor(se::Color(1.0f, 1.0f, 1.0f));
     SetX(player.GetX()+10);
-    SetY(player.GetY()+60);
+    SetY(player.GetY()+200);
     casting = true;
   }
 
@@ -27,8 +28,10 @@ public:
       SetY(0);
       casting = false;
     }
-    else
+    else {
+      window.Draw(this);
       Move(5, -5);
+    }
   }
 
 };

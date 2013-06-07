@@ -49,6 +49,9 @@ public:
    */
   void SetImage(Image &image);
 
+protected:
+  Image image;
+
 private:
   /**
    * @brief Смотри Renderable::Render()
@@ -56,9 +59,6 @@ private:
    * Рисует спрайт с наложенным изображением
    */
   void Render() const;
-
-  /// Изображение спрайта
-  Image image;
 
   /// Текущий угол поворота
   double angle;

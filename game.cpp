@@ -28,10 +28,12 @@ int main() {
   KeySphere currentSphere;
   se::Image playerImg;
   playerImg.LoadFromFile("img\\player.png");
-  Player player(50, 50, 0);
+  Player player(50, 0, 0);
   player.SetImage(playerImg);
   
   se::Sprite spheres[3];
+  for (int i = 0; i < 3; i++)
+    spheres[i].SetY(window.GetHeight()-50);
   
   se::Image images[3];
   images[0].LoadFromFile("img\\fire.png");
@@ -39,10 +41,12 @@ int main() {
   images[2].LoadFromFile("img\\lighting.png");
   
   int castType;
+  bool k1p;
+  bool k2p;
+  bool k3p;
+  k1p = k2p = k3p = false;
 
   bool castingSkill = false;
-  
-  std::vector<Skill *> skillsOnFrame;
 
   while (window.IsOpened()) {
     window.ProcessEvents();
@@ -55,23 +59,29 @@ int main() {
         castingSkill = true;
     }
     else {
-      if (input.IsKeyPressed(49)) { currentSphere.k1++; castType = 1; }
-      else if (input.IsKeyPressed(50)) { currentSphere.k2++; castType = 2; }
-      else if (input.IsKeyPressed(51)) { currentSphere.k3++; castType = 3; }
+      if (input.IsKeyPressed(49) && !k1p) { currentSphere.k1++; castType = 1; k1p = true; }
+      else if (input.IsKeyPressed(50) && !k2p) { currentSphere.k2++; castType = 2; k2p = true; }
+      else if (input.IsKeyPressed(51) && !k3p) { currentSphere.k3++; castType = 3; k3p = true;}
+
+      if (!input.IsKeyPressed(49)) k1p = false;
+      if (!input.IsKeyPressed(50)) k2p = false;
+      if (!input.IsKeyPressed(51)) k3p = false;
     }
-    if (input.IsKeyPressed('W')) player.Move(0, 1);
+
+    if (input.IsKeyPressed('W')) player.Jump();
     if (input.IsKeyPressed('A')) player.Move(-1, 0);
-    if (input.IsKeyPressed('S')) player.Move(0, -1);
     if (input.IsKeyPressed('D')) player.Move(1, 0);
 
     // Key-hack for testing
-    if (input.IsKeyPressed(VK_F1)) { currentSphere.k1 = 2; currentSphere.k2 = 1; currentSphere.k3 = 0; };
+    if (input.IsKeyPressed(VK_F1)) { currentSphere.k1 = 2; currentSphere.k2 = 1; currentSphere.k3 = 0; castingSkill = true; };
 
     if (castType != 0) {
       int count = currentSphere.GetCount()-1;
       spheres[count].SetImage(images[castType-1]);
       spheres[count].SetX(50*count);
     }
+
+    player.Tick();
 
     window.Clear(se::Color(1.0f, 1.0f, 1.0f));
 
@@ -86,18 +96,13 @@ int main() {
     if (castingSkill) {
       if (skills.first == currentSphere) {
         skills.second->Cast(player);
-        skillsOnFrame.push_back(skills.second);
       }
       currentSphere.Clear();
       castingSkill = false;
     }
 
-    for (std::vector<Skill *>::iterator i = skillsOnFrame.begin(); i != skillsOnFrame.end(); i++) {
-      if ((*i)->casting)
-        (*i)->Tick(window);
-      else
-        skillsOnFrame.erase(i);
-    }
+    if (skills.second->casting)
+      skills.second->Tick(window);
 
     window.Display();
     Sleep(15);

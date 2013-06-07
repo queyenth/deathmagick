@@ -1,7 +1,6 @@
 #include "PhysicsObject.h"
 
 void PhysicsObject::Tick() {
-  static int yC;
   switch (inAir) {
   case STADING:
     break;
@@ -9,18 +8,19 @@ void PhysicsObject::Tick() {
     if (currentJump <= 0)
       inAir = FALLING;
     else {
-      yC = y;
-      currentJump = maxJump;
       currentJump -= G;
-      y += currentJump;
+      SetY(y + currentJump);
     }
     break;
   case FALLING:
-    if (y >= yC) {
-      currentJump += G;
-      y -= currentJump;
-    }
-    else
+    if (y <= 0) {
       inAir = STADING;
+      SetY(0);
+    }
+    else {
+      currentJump += G;
+      SetY(y - currentJump);
+    }
+    break;
   }
 }
