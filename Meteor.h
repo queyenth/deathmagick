@@ -6,7 +6,7 @@
 
 class Meteor : public Skill {
 public:
-  Meteor() : Skill() {
+  Meteor() : Skill(0, 0, 50, 50) {
 
   }
 

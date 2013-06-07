@@ -10,6 +10,18 @@
 
 std::pair<KeySphere, Skill *> skills;
 
+bool CheckCollision(PhysicsObject& first, PhysicsObject &second) {
+	unsigned int width = first.GetX() + first.GetWidth();
+	unsigned int height = first.GetY() + first.GetHeight();
+	unsigned int aWidth = second.GetX() + second.GetWidth();
+	unsigned int aHeight = second.GetY() + second.GetHeight();
+
+	// Check collision between two objects
+
+  //return (first.GetY() < aHeight && width > second.GetX());
+	return (first.GetX() < aWidth && first.GetY() < aHeight && second.GetX() < width && second.GetY() < height);
+}
+
 void InitSkills() {
   // Meteor
   skills.first = KeySphere(2, 1, 0);
@@ -29,7 +41,9 @@ int main() {
   se::Image playerImg;
   playerImg.LoadFromFile("img\\player.png");
   Player player(50, 0, 0);
+  Player enemy(200, 0, 0);
   player.SetImage(playerImg);
+  enemy.SetImage(playerImg);
   
   se::Sprite spheres[3];
   for (int i = 0; i < 3; i++)
@@ -47,6 +61,7 @@ int main() {
   k1p = k2p = k3p = false;
 
   bool castingSkill = false;
+  bool isDamaged = false;
 
   while (window.IsOpened()) {
     window.ProcessEvents();
@@ -87,6 +102,9 @@ int main() {
 
     // Drawing player
     window.Draw(&player);
+
+    if (enemy.IsAlive())
+	    window.Draw(&enemy);
     
     // Drawing spheres
     for (int i = 0; i < currentSphere.GetCount(); i++)
@@ -98,11 +116,16 @@ int main() {
         skills.second->Cast(player);
       }
       currentSphere.Clear();
-      castingSkill = false;
+      castingSkill = isDamaged = false;
     }
 
-    if (skills.second->casting)
+    if (skills.second->casting) {
       skills.second->Tick(window);
+	    if (CheckCollision(enemy, *skills.second) && enemy.IsAlive() && !isDamaged) {
+        enemy.DamageHim(skills.second->GetDamage());
+        isDamaged = true;
+      }
+    }
 
     window.Display();
     Sleep(15);
