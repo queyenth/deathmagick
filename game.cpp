@@ -4,6 +4,7 @@
 #include "KeySphere.h"
 #include "Meteor.h"
 #include "Player.h"
+#include "String.hpp"
 
 #include <utility>
 #include <vector>
@@ -38,6 +39,11 @@ int main() {
 
   const se::Input &input = window.GetInput();
   KeySphere currentSphere;
+
+  se::String testString;
+  testString.SetFont(window.GetDC(), L"Courier New");
+  testString.SetColor(se::Color(0.0f, 0.0f, 0.0f));
+  
   se::Image playerImg;
   playerImg.LoadFromFile("img\\player.png");
   Player player(50, 0, 0);
@@ -123,6 +129,12 @@ int main() {
       skills.second->Tick(window);
 	    if (CheckCollision(enemy, *skills.second) && enemy.IsAlive() && !isDamaged) {
         enemy.DamageHim(skills.second->GetDamage());
+        wchar_t text[10];
+        wsprintf(text, L"%d", skills.second->GetDamage());
+        testString.SetText(text);
+        testString.SetX(enemy.GetX());
+        testString.SetY(enemy.GetY()+15);
+        window.Draw(&testString);
         isDamaged = true;
       }
     }

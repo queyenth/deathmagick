@@ -10,6 +10,8 @@ namespace se {
 
 class String : public Renderable {
 public:
+  enum { CountOfCharset = 96 };
+
   String();
   String(std::wstring text, int x = 0, int y = 0, int size = 24,
     int weight = FW_BOLD,

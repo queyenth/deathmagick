@@ -118,6 +118,8 @@ public:
    * @return хэндл окна
    */
   HWND GetHandle() const;
+
+  HDC GetDC() const;
 private:
   /**
    * @brief Инициализирует OpenGL

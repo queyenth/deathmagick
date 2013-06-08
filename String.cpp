@@ -22,7 +22,7 @@ String::String(std::wstring text, int x, int y, int size,
 
 String::~String() {
   if (base != 0)
-    glDeleteLists(base, 96);
+    glDeleteLists(base, CountOfCharset);
 }
 
 void String::SetText(std::wstring newText) {
@@ -38,19 +38,19 @@ void String::Render() const {
   glRasterPos2i(x, y);
   glPushAttrib(GL_LIST_BIT);
   glListBase(base - 32);
-  glCallLists(text.length(), GL_UNSIGNED_BYTE, text.c_str());
+  glCallLists(text.length()*sizeof(wchar_t), GL_UNSIGNED_BYTE, text.c_str());
   glPopAttrib();
 }
 
 void String::BuildFont(HDC hDC) {
   HFONT font;
   HFONT oldfont;
-  base = glGenLists(96);
+  base = glGenLists(CountOfCharset);
   font = CreateFont(-size, 0, 0, 0, weight, italic, underline, strikeout,
     ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY,
     FF_DONTCARE | DEFAULT_PITCH, fontName.c_str());
   oldfont = (HFONT)SelectObject(hDC, font);
-  wglUseFontBitmaps(hDC, 32, 96, base);
+  wglUseFontBitmaps(hDC, 32, CountOfCharset, base);
   SelectObject(hDC, oldfont);
   DeleteObject(font);
 }

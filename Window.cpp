@@ -128,7 +128,7 @@ void Window::CreateUserWindow() {
     0, 0, 0
   };
 
-  hDC = GetDC(hWnd);
+  hDC = ::GetDC(hWnd);
   PixelFormat = ChoosePixelFormat(hDC, &pfd);
   SetPixelFormat(hDC, PixelFormat, &pfd);
   hRC = wglCreateContext(hDC);
@@ -299,6 +299,10 @@ wstring Window::GetName() const {
  */
 HWND Window::GetHandle() const {
   return hWnd;
+}
+
+HDC Window::GetDC() const {
+  return hDC;
 }
 
 }
