@@ -11,6 +11,8 @@ struct tagIMPR {
 
 class Skill : public PhysicsObject {
 public:
+  enum Destination { UP, DOWN, RIGHT, LEFT };
+
   Skill() : PhysicsObject(0, 0), damage(0), range(0), impr(0, 0, 0), casting(false) {}
   Skill(int x, int y, int damage, int range) : PhysicsObject(x, y), impr(0, 0, 0), damage(damage), range(range), casting(false) { }
   virtual ~Skill() {}
@@ -25,5 +27,6 @@ public:
 protected:
   int damage;
   int range;
+  Destination destination;
   tagIMPR impr;
 };

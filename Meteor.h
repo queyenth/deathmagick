@@ -15,12 +15,14 @@ public:
   }
 
   void Cast(Player &player) {
-    image.LoadFromFile("img\\meteor.jpg");
+    image.LoadFromFile("img\\meteor.png");
     SetImage(image);
     SetColor(se::Color(1.0f, 1.0f, 1.0f));
-    SetX(player.GetX()+10);
-    SetY(player.GetY()+200);
+    SetX(player.GetX() + (destination == RIGHT ? 10 : -10));
+    SetY(player.GetY() + 200);
     casting = true;
+    FlipX(player.IsFlippedX());
+    destination = IsFlippedX() ? LEFT : RIGHT;
   }
 
   void Tick(se::Window &window) {
@@ -30,7 +32,16 @@ public:
     }
     else {
       window.Draw(this);
-      Move(5, -5);
+      switch (destination) {
+      case LEFT:
+        Move(-5, -5);
+        break;
+      case RIGHT:
+        Move(5,-5);
+        break;
+      default:
+        break;
+      }
     }
   }
 
