@@ -191,8 +191,8 @@ void Renderable::Rotate(float newAngle) {
   while (angle < 0) angle += 360;
 
   // Сразу вычисляем косинус и синус, ибо дорогостоящая операция
-  float Cos = cosf(angle*3.14159265/180);
-  float Sin = sinf(angle*3.14159265/180);
+  float Cos = cosf(angle*(float)(3.14159265/180));
+  float Sin = sinf(angle*(float)(3.14159265/180));
 
   // Обновляем матрицу
   matrix.Set(0, Cos);
@@ -227,6 +227,14 @@ void Renderable::FlipX(bool isFlip) {
  */
 void Renderable::FlipY(bool isFlip) {
   isFlippedY = isFlip;
+}
+
+bool Renderable::IsFlippedX() const {
+  return isFlippedX;
+}
+
+bool Renderable::IsFlippedY() const {
+  return isFlippedY;
 }
 
 void Renderable::InitTextureRect() {

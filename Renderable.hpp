@@ -155,6 +155,9 @@ public:
    */
   void FlipY(bool isFlip);
 
+  bool IsFlippedX() const;
+  bool IsFlippedY() const;
+
 protected:
   
   bool isFlippedX;
