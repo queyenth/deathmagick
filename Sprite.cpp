@@ -56,13 +56,13 @@ void Sprite::SetImage(Image &image) {
 void Sprite::Render() const {
 
   // Запоминаем высоту и ширину спрайта
-  float width = GetWidth();
-  float height = GetHeight();
+  unsigned int width = GetWidth();
+  unsigned int height = GetHeight();
 
-  float top = isFlippedY ? textureRect.bottom : textureRect.top;
-  float left = isFlippedX ? textureRect.right : textureRect.left;
-  float right = isFlippedX ? textureRect.left : textureRect.right;
-  float bottom = isFlippedY ? textureRect.top : textureRect.bottom;
+  unsigned int top = isFlippedY ? textureRect.bottom : textureRect.top;
+  unsigned int left = isFlippedX ? textureRect.right : textureRect.left;
+  unsigned int right = isFlippedX ? textureRect.left : textureRect.right;
+  unsigned int bottom = isFlippedY ? textureRect.top : textureRect.bottom;
 
   // Если текстура валидна, и, высота или ширина не равна нулю, то рендерим
   if (image.IsValid() && (width != 0 || height != 0)) {
@@ -70,27 +70,27 @@ void Sprite::Render() const {
     glEnable(GL_TEXTURE_2D);
     image.BindTexture();
     glBegin(GL_QUADS);
-      glTexCoord2f(left, top);
-      glVertex2f(0, 0);
+      glTexCoord2i(left, top);
+      glVertex2i(0, 0);
 
-      glTexCoord2f(right, top);
-      glVertex2f(width, 0);
+      glTexCoord2i(right, top);
+      glVertex2i(width, 0);
 
-      glTexCoord2f(right, bottom);
-      glVertex2f(width, height);
+      glTexCoord2i(right, bottom);
+      glVertex2i(width, height);
 
-      glTexCoord2f(left, bottom);
-      glVertex2f(0, height);
+      glTexCoord2i(left, bottom);
+      glVertex2i(0, height);
     glEnd();
   }
   else {
     // Текстура не валидна - текстуринг не нужен
     glDisable(GL_TEXTURE_2D);
     glBegin(GL_QUADS);
-      glVertex2f(0, 0);
-      glVertex2f(32, 0);
-      glVertex2f(32, 32);
-      glVertex2f(0, 32);
+      glVertex2i(0, 0);
+      glVertex2i(32, 0);
+      glVertex2i(32, 32);
+      glVertex2i(0, 32);
     glEnd();
   }
 }
