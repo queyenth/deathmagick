@@ -8,6 +8,7 @@
 
 #include <utility>
 #include <vector>
+#include <ctime>
 
 std::pair<KeySphere, Skill *> skills;
 
@@ -17,9 +18,6 @@ bool CheckCollision(PhysicsObject& first, PhysicsObject &second) {
 	unsigned int aWidth = second.GetX() + second.GetWidth();
 	unsigned int aHeight = second.GetY() + second.GetHeight();
 
-	// Check collision between two objects
-
-  //return (first.GetY() < aHeight && width > second.GetX());
 	return (first.GetX() < aWidth && first.GetY() < aHeight && second.GetX() < width && second.GetY() < height);
 }
 
@@ -35,21 +33,25 @@ void DeinitSkills() {
 
 int main() {
   InitSkills();
+  srand(time(NULL));
   se::Window window(L"Test");
 
   const se::Input &input = window.GetInput();
+  se::Camera &camera = window.GetCamera();
   KeySphere currentSphere;
 
   se::String testString;
   testString.SetFont(window.GetDC(), L"Courier New");
-  testString.SetColor(se::Color(0.0f, 0.0f, 0.0f));
   
   se::Image playerImg;
   playerImg.LoadFromFile("img\\player.png");
   Player player(50, 0, 0);
-  Player enemy(200, 0, 0);
+  Player enemies[10];
+  for (int i = 0; i < 10; i++) {
+    enemies[i].SetX((i+1)*80);
+    enemies[i].SetImage(playerImg);
+  }
   player.SetImage(playerImg);
-  enemy.SetImage(playerImg);
   
   se::Sprite spheres[3];
   for (int i = 0; i < 3; i++)
@@ -90,8 +92,11 @@ int main() {
     }
 
     if (input.IsKeyPressed('W')) player.Jump();
-    if (input.IsKeyPressed('A')) player.Move(-1, 0);
-    if (input.IsKeyPressed('D')) player.Move(1, 0);
+    if (input.IsKeyPressed('A')) { player.Move(-1, 0); player.FlipX(true); }
+    if (input.IsKeyPressed('D')) { player.Move(1, 0); player.FlipX(false); }
+
+    if (player.GetX() >= window.GetWidth()/2 + camera.GetViewX()) camera.OffsetViewByX(player.GetX() - window.GetWidth()/2);
+    else if (player.GetX() <= window.GetWidth()/2) camera.SetViewPoint(se::Vertex2D(0, 0));
 
     // Key-hack for testing
     if (input.IsKeyPressed(VK_F1)) { currentSphere.k1 = 2; currentSphere.k2 = 1; currentSphere.k3 = 0; castingSkill = true; };
@@ -104,13 +109,14 @@ int main() {
 
     player.Tick();
 
-    window.Clear(se::Color(1.0f, 1.0f, 1.0f));
+    window.Clear(se::Color(0.0f, 0.0f, 0.0f));
 
     // Drawing player
     window.Draw(&player);
 
-    if (enemy.IsAlive())
-	    window.Draw(&enemy);
+    for (int i = 0; i < 10; i++)
+      if (enemies[i].IsAlive())
+	      window.Draw(&enemies[i]);
     
     // Drawing spheres
     for (int i = 0; i < currentSphere.GetCount(); i++)
@@ -127,16 +133,17 @@ int main() {
 
     if (skills.second->casting) {
       skills.second->Tick(window);
-	    if (CheckCollision(enemy, *skills.second) && enemy.IsAlive() && !isDamaged) {
-        enemy.DamageHim(skills.second->GetDamage());
-        wchar_t text[10];
-        wsprintf(text, L"%d", skills.second->GetDamage());
-        testString.SetText(text);
-        testString.SetX(enemy.GetX());
-        testString.SetY(enemy.GetY()+15);
-        window.Draw(&testString);
-        isDamaged = true;
-      }
+      for (int i = 0; i < 10; i++)
+	      if (CheckCollision(enemies[i], *skills.second) && enemies[i].IsAlive() && !isDamaged) {
+          wchar_t text[5];
+          wsprintf(text, L"%d", skills.second->GetDamage());
+          enemies[i].DamageHim(skills.second->GetDamage());
+          testString.SetText(text);
+          testString.SetX(enemies[i].GetX()+enemies[i].GetWidth()-camera.GetViewX());
+          testString.SetY(enemies[i].GetY()+enemies[i].GetHeight()-camera.GetViewY()+10);
+          testString.Render();
+          isDamaged = true;
+        }
     }
 
     window.Display();

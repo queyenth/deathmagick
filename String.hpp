@@ -8,7 +8,7 @@
 
 namespace se {
 
-class String : public Renderable {
+class String {
 public:
   enum { CountOfCharset = 96 };
 
@@ -28,10 +28,12 @@ public:
   void SetItalic(bool italic);
   void SetUnderline(bool underline);
   void SetStrikeout(bool strikeout);
+  void SetX(int x);
+  void SetY(int y);
 
+  void Render() const;
 private:
   void BuildFont(HDC);
-  void Render() const;
 
   std::wstring text;
   GLuint base;
@@ -42,6 +44,8 @@ private:
   bool italic;
   bool underline;
   bool strikeout;
+  int x;
+  int y;
 };
 
 }

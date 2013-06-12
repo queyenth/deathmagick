@@ -10,7 +10,7 @@ String::String() {
 }
 
 String::String(std::wstring text, int x, int y, int size,
-  int weight, bool italic, bool underline, bool strikeout) : Renderable(x, y) {
+  int weight, bool italic, bool underline, bool strikeout) {
   base = 0;
   this->text = text;
   this->size = size;
@@ -18,6 +18,8 @@ String::String(std::wstring text, int x, int y, int size,
   this->italic = italic;
   this->underline = underline;
   this->strikeout = strikeout;
+  this->x = x;
+  this->y = y;
 }
 
 String::~String() {
@@ -78,6 +80,14 @@ void String::SetStrikeout(bool strikeout) {
 void String::SetFont(HDC hDC, std::wstring fontName) {
   this->fontName = fontName;
   BuildFont(hDC);
+}
+
+void String::SetX(int x) {
+  this->x = x;
+}
+
+void String::SetY(int y) {
+  this->y = y;
 }
 
 }
