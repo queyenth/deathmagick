@@ -38,7 +38,7 @@ public:
    * @param x : координата по X (по умолчанию 0)
    * @param y : координата по Y (по умолчанию 0)
    */
-  Renderable(unsigned int x=0, unsigned int y=0);
+  Renderable(unsigned int x=0, unsigned int y=0, unsigned int width=0, unsigned int height=0, Color color = Color(), bool isFixed=false);
 
   /**
    * @brief Виртуальный деструктор
@@ -119,6 +119,8 @@ public:
    */
   void SetHeight(unsigned int height);
 
+  void SetFixedMode(bool isFixed);
+
   /**
    * @brief Перемещает объект на offsetX по X, и на offsetY по Y
    *
@@ -157,6 +159,8 @@ public:
 
   bool IsFlippedX() const;
   bool IsFlippedY() const;
+
+  bool IsFixed() const;
 
 protected:
   
@@ -201,6 +205,8 @@ private:
   float angle;
 
   mutable bool positionChanged;
+
+  bool isFixed;
 };
 
 }

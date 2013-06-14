@@ -30,8 +30,8 @@ namespace se {
  * @param x : координата по X (по умолчанию 0)
  * @param y : координата по Y (по умолчанию 0)
  */
-Renderable::Renderable(unsigned int x, unsigned int y) : x(x), y(y), width(0), height(0), angle(0), positionChanged(true),
-isFlippedX(false), isFlippedY(false) {
+Renderable::Renderable(unsigned int x, unsigned int y, unsigned int width, unsigned int height, Color color, bool isFixed) : x(x), y(y), width(0), height(0), angle(0), positionChanged(true),
+isFlippedX(false), isFlippedY(false), isFixed(isFixed) {
   InitTextureRect();
 }
 
@@ -100,6 +100,10 @@ void Renderable::SetColor(Color color) {
   this->color = color;
 }
 
+void Renderable::SetFixedMode(bool isFixed) {
+  this->isFixed = isFixed;
+}
+
 /**
  * @return координату X
  */
@@ -142,6 +146,10 @@ float Renderable::GetAngle() const {
   return angle;
 }
 
+bool Renderable::IsFixed() const {
+  return isFixed;
+}
+
 /**
  * @brief Функция рисовки
  *
@@ -158,8 +166,8 @@ void Renderable::Draw(Camera &camera) const {
 
   // Если положение объекта изменилось, или изменилась камера, МОДИФИЦИРУЕМ МАТРИЦУ FUCK YEAH
   if (camera.Changed() || positionChanged) {
-    matrix.Set(12, x-camera.GetViewX());
-    matrix.Set(13, y-camera.GetViewY());
+    matrix.Set(12, isFixed ? x : x-camera.GetViewX());
+    matrix.Set(13, isFixed ? y : y-camera.GetViewY());
     positionChanged = false;
   }
 
@@ -167,7 +175,11 @@ void Renderable::Draw(Camera &camera) const {
   glMultMatrixf(matrix.GetMatrix());
 
   // Устанавливаем цвет
-  glColor3f(color.GetRed(), color.GetGreen(), color.GetBlue());
+  if (color.GetAlpha() != 0.0f) {
+    glColor4f(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
+  }
+  else
+    glColor3f(color.GetRed(), color.GetGreen(), color.GetBlue());
 
   // Даем наследуемому классу рисовать что он там хочет
   Render();
