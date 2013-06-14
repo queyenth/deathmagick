@@ -19,6 +19,7 @@ public:
       health = 0;
 	  else
 	    health -= damage;
+    SetColor(se::Color(1.0f, 0.4f, 0.4f, 1.0f));
   }
 
   bool IsAlive() const {
