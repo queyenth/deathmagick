@@ -35,7 +35,7 @@ public:
    * @param x : координата по X(по умолчанию 0)
    * @param y : координата по Y(по умолчанию 0)
    */
-  Sprite(unsigned int x=0, unsigned int y=0);
+  Sprite(unsigned int x=0, unsigned int y=0, unsigned int width=0, unsigned int height=0, Color color = Color(), bool isFixed=false);
 
   /**
    * @brief Виртуальный деструктор

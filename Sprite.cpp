@@ -26,8 +26,8 @@ namespace se {
  * @param x : координата по X(по умолчанию 0)
  * @param y : координата по Y(по умолчанию 0)
  */
-Sprite::Sprite(unsigned int x, unsigned int y) : Renderable(x, y), image() {
-
+Sprite::Sprite(unsigned int x, unsigned int y, unsigned int width, unsigned int height, Color color, bool isFixed) : Renderable(x, y, width, height, color, isFixed), image() {
+  
 }
 
 /**
@@ -88,9 +88,9 @@ void Sprite::Render() const {
     glDisable(GL_TEXTURE_2D);
     glBegin(GL_QUADS);
       glVertex2i(0, 0);
-      glVertex2i(32, 0);
-      glVertex2i(32, 32);
-      glVertex2i(0, 32);
+      glVertex2i(width, 0);
+      glVertex2i(width, height);
+      glVertex2i(0, height);
     glEnd();
   }
 }
