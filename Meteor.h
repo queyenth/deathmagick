@@ -6,7 +6,7 @@
 
 class Meteor : public Skill {
 public:
-  Meteor() : Skill(0, 0, 50, 50) {
+  Meteor() : Skill(0, 0, 50, 100) {
 
   }
 
@@ -14,7 +14,7 @@ public:
 
   }
 
-  void Cast(Player &player) {
+  void Cast(Player &player) override {
     image.LoadFromFile("img\\meteor.png");
     SetImage(image);
     SetColor(se::Color(1.0f, 1.0f, 1.0f));
@@ -25,23 +25,28 @@ public:
     destination = IsFlippedX() ? LEFT : RIGHT;
   }
 
-  void Tick(se::Window &window) {
-    if (y <= 0) {
-      SetY(0);
-      casting = false;
-    }
-    else {
-      window.Draw(this);
-      switch (destination) {
-      case LEFT:
-        Move(-5, -5);
-        break;
-      case RIGHT:
-        Move(5,-5);
-        break;
-      default:
-        break;
+  void Tick(se::Window &window, int count, ...) override {
+    va_list vl;
+    se::Renderable *val;
+    va_start(vl, count);
+      for (int i = 0; i < count; i++) {
+        val = va_arg(vl, se::Renderable *);
+        if (PhysicsObject::CheckCollision(*this, *val)) {
+          casting = false;
+          return ;
+        }
       }
+    va_end(vl);
+    window.Draw(this);
+    switch (destination) {
+    case LEFT:
+      Move(-5, -5);
+      break;
+    case RIGHT:
+      Move(5,-5);
+      break;
+    default:
+      break;
     }
   }
 
