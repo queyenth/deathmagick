@@ -30,11 +30,11 @@ public:
    * @param x : координата по X (по умолчанию 0)
    * @param y : координата по Y (по умолчанию 0)
    */
-  Vertex2D(float x=0, float y=0) : x(x), y(y) {
+  Vertex2D(unsigned int x=0, unsigned int y=0) : x(x), y(y) {
 
   }
 
-  friend bool operator==(Vertex2D left, Vertex2D right) {
+  friend bool operator==(Vertex2D &left, Vertex2D &right) {
     if (left.x == right.x && left.y == right.y)
       return true;
     else
@@ -42,9 +42,9 @@ public:
   }
 
   /// Координата по X
-  float x;
+  unsigned int x;
   /// Координата по Y
-  float y;
+  unsigned int y;
 };
 
 typedef Vertex2D Point2D;

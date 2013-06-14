@@ -46,7 +46,7 @@ public:
    * @param x : точка просмотра по X
    * @param y : точка просмотра по Y
    */
-  Camera(float x, float y) : viewPoint(x, y), isChanged(true) {
+  Camera(unsigned int x, unsigned int y) : viewPoint(x, y), isChanged(true) {
     // Nothing to do
   }
 
@@ -72,7 +72,7 @@ public:
    *
    * @param x : новая точка камеры по X
    */
-  void SetViewX(float x) {
+  void SetViewX(unsigned int x) {
     viewPoint.x = x;
     isChanged = true;
   }
@@ -82,7 +82,7 @@ public:
    *
    * @param y : новая точка камеры по Y
    */
-  void SetViewY(float y) {
+  void SetViewY(unsigned int y) {
     viewPoint.y = y;
     isChanged = true;
   }
@@ -102,7 +102,7 @@ public:
    *
    * @param x : offset параметр
    */
-  void OffsetViewByX(float x) {
+  void OffsetViewByX(unsigned int x) {
     viewPoint.x += x;
     isChanged = true;
   }
@@ -112,7 +112,7 @@ public:
    *
    * @param y : offset параметр
    */
-  void OffsetViewByY(float y) {
+  void OffsetViewByY(unsigned int y) {
     viewPoint.y += y;
     isChanged = true;
   }
@@ -127,14 +127,14 @@ public:
   /**
    * @return точку просмотра камеры по X
    */
-  float GetViewX() const {
+  unsigned int GetViewX() const {
     return viewPoint.x;
   }
 
   /**
    * @return точку просмотра камеры по Y
    */
-  float GetViewY() const {
+  unsigned int GetViewY() const {
     return viewPoint.y;
   }
 
