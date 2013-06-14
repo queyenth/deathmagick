@@ -1,8 +1,20 @@
 #include "PhysicsObject.h"
 
-void PhysicsObject::Tick() {
+void PhysicsObject::Tick(int count, ...) {
+  va_list vl;
+  se::Renderable *value;
   switch (inAir) {
   case STADING:
+    SetY(y - G);
+    va_start(vl, count);
+    for (int i = 0; i < count; i++) {
+      value = va_arg(vl, se::Renderable *);
+      if (!CheckCollision(*this, *value)) {
+        inAir = FALLING;
+        return ;
+      }
+    }
+    SetY(y + G);
     break;
   case INAIR:
     if (currentJump <= 0)
@@ -13,14 +25,27 @@ void PhysicsObject::Tick() {
     }
     break;
   case FALLING:
-    if (y <= 0) {
-      inAir = STADING;
-      SetY(0);
+    currentJump += G;
+    SetY(y - currentJump);
+    va_start(vl, count);
+    for (int i = 0; i < count; i++) {
+      value = va_arg(vl, se::Renderable *);
+      if (CheckCollision(*this, *value)) {
+        SetY(value->GetY()+value->GetHeight());
+        inAir = STADING;
+        return ;
+      }
     }
-    else {
-      currentJump += G;
-      SetY(y - currentJump);
-    }
+    va_end(vl);
     break;
   }
+}
+
+bool PhysicsObject::CheckCollision(const se::Renderable &first, const se::Renderable &second) {
+  unsigned int width = first.GetX() + first.GetWidth();
+	unsigned int height = first.GetY() + first.GetHeight();
+	unsigned int aWidth = second.GetX() + second.GetWidth();
+	unsigned int aHeight = second.GetY() + second.GetHeight();
+
+	return (first.GetX() < aWidth && first.GetY() < aHeight && second.GetX() < width && second.GetY() < height);
 }
