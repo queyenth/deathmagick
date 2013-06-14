@@ -33,7 +33,7 @@ public:
    * @param g : зеленый цвет (по умолчанию 1.0)
    * @param b : синий цвет (по умолчанию 1.0)
    */
-  Color(float r=1.0f, float g=1.0f, float b=1.0f);
+  Color(float r=1.0f, float g=1.0f, float b=1.0f, float a=0.0f);
 
   /**
    * @return Значение красного цвета
@@ -49,6 +49,8 @@ public:
    * @return Значение синего цвета
    */
   float GetBlue() const;
+
+  float GetAlpha() const;
 
   /**
    * @brief Устанавливает новое значение красного цвета
@@ -71,8 +73,10 @@ public:
    */
   void SetBlue(float b);
 
+  void SetAlpha(float a);
+
   bool operator==(Color right) {
-    if (this->r == right.r && this->g == right.g && this->b == right.b)
+    if (this->r == right.r && this->g == right.g && this->b == right.b && this->a == right.a)
       return true;
     else
       return false;
@@ -107,6 +111,9 @@ private:
 
   /** Должен быть [0;1] */
   float b;
+
+  /** Должен быть [0;1] */
+  float a;
 };
 
 }

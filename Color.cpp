@@ -32,7 +32,7 @@ const Color Blue(0, 0, 1);
  * @param g : зеленый цвет (по умолчанию 1.0)
  * @param b : синий цвет (по умолчанию 1.0)
  */
-Color::Color(float r, float g, float b) : r(r), g(g), b(b) { }
+Color::Color(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) { }
 
 /**
  * @return Значение красного цвета
@@ -53,6 +53,10 @@ float Color::GetGreen() const {
  */
 float Color::GetBlue() const {
   return b;
+}
+
+float Color::GetAlpha() const {
+  return a;
 }
 
 /**
@@ -80,6 +84,10 @@ void Color::SetGreen(float g) {
  */
 void Color::SetBlue(float b) {
   this->b = b;
+}
+
+void Color::SetAlpha(float a) {
+  this->a = a;
 }
 
 }
