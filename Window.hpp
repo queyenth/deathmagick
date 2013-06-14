@@ -46,7 +46,7 @@ public:
    * @param height : высота окна (по умолчанию 480)
    * @param bits : глубина окна (по умолчанию 640)
    */
-  Window(wstring name, int width=640, int height=480, int bits=32);
+  Window(wstring name, unsigned int width=640, unsigned int height=480, int bits=32);
 
   /**
    * @brief Метод, который создает окно, и устанавливает на него фокус
@@ -102,12 +102,12 @@ public:
   /**
    * @return ширину окна
    */
-  int GetWidth() const;
+  unsigned int GetWidth() const;
 
   /**
    * @return высоту окна
    */
-  int GetHeight() const;
+  unsigned int GetHeight() const;
 
   /**
    * @return имя окна
@@ -161,10 +161,10 @@ private:
   RECT windowRect;
 
   /// ширина окна
-  int width;
+  unsigned int width;
 
   /// высота окна
-  int height;
+  unsigned int height;
 
   int bits;
 

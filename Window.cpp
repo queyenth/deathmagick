@@ -63,7 +63,7 @@ Window::~Window() {
  * @param height : высота окна (по умолчанию 480)
  * @param bits : глубина окна (по умолчанию 640)
  */
-Window::Window(wstring name, int width, int height, int bits) : camera(0, 0) {
+Window::Window(wstring name, unsigned int width, unsigned int height, int bits) : camera(0, 0) {
   hWnd = NULL;
   hInstance = GetModuleHandle(NULL);
   this->width = width;
@@ -188,6 +188,9 @@ void Window::ProcessEvents(UINT uMsg, WPARAM wParam, LPARAM lParam) {
       isOpened = false;
       Cleanup();
       break;
+    case WM_SIZE:
+      glViewport(0, 0, LOWORD(lParam), HIWORD(lParam));
+      break;
     default:
       break;
   }
@@ -223,6 +226,9 @@ void Window::InitGL() {
   glShadeModel(GL_SMOOTH);
   glClearDepth(1.0f);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_ALPHA_TEST);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDepthFunc(GL_LEQUAL);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glViewport(0, 0, width, height);
@@ -276,14 +282,14 @@ Camera& Window::GetCamera() {
 /**
  * @return ширину окна
  */
-int Window::GetWidth() const {
+unsigned int Window::GetWidth() const {
 	return width;
 }
 
 /**
  * @return высоту окна
  */
-int Window::GetHeight() const {
+unsigned int Window::GetHeight() const {
 	return height;
 }
 
