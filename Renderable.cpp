@@ -30,8 +30,8 @@ namespace se {
  * @param x : координата по X (по умолчанию 0)
  * @param y : координата по Y (по умолчанию 0)
  */
-Renderable::Renderable(unsigned int x, unsigned int y, unsigned int width, unsigned int height, Color color, bool isFixed) : x(x), y(y), width(0), height(0), angle(0), positionChanged(true),
-isFlippedX(false), isFlippedY(false), isFixed(isFixed) {
+Renderable::Renderable(unsigned int x, unsigned int y, unsigned int width, unsigned int height, Color color, bool isFixed) : x(x), y(y), width(width), height(height), angle(0), positionChanged(true),
+isFlippedX(false), isFlippedY(false), isFixed(isFixed), color(color) {
   InitTextureRect();
 }
 

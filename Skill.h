@@ -18,11 +18,16 @@ public:
   virtual ~Skill() {}
 
   virtual void Cast(Player &) = 0;
-  virtual void Tick(se::Window &) = 0;
+  virtual void Tick(se::Window &, int count, ...) = 0;
+  
   virtual int GetDamage() {
     return damage;
   }
   
+  virtual int GetRange() {
+    return range;
+  }
+
   bool casting;
 protected:
   int damage;
