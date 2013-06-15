@@ -6,8 +6,7 @@ String::String() : se::Renderable(0, 0, 0, 0, se::Color(), true) {
 
 }
 
-String::String(std::wstring text, Font *font, int x, int y, int size,
-  int weight, bool italic, bool underline, bool strikeout) : se::Renderable(x, y, 0, 0, se::Color(), true) {
+String::String(std::wstring text, Font *font, int x, int y, Color color, bool fixed) : se::Renderable(x, y, 0, 0, color, fixed) {
   this->text = text;
   this->font = font;
 }

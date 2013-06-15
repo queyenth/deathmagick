@@ -30,8 +30,7 @@ public:
   }
 
   ~Font() {
-    if (base != 0)
-      glDeleteLists(base, CountOfCharset);
+    glDeleteLists(base, CountOfCharset);
   }
 
   void BuildFont(HDC hDC) {
