@@ -9,17 +9,37 @@
 #include <utility>
 #include <vector>
 #include <ctime>
+#include <algorithm>
+
+
+class DrawSomeTime {
+public:
+  DrawSomeTime(se::Renderable *entity, DWORD time) {
+    SetEntity(entity);
+    this->time = time;
+  }
+
+  DrawSomeTime() {
+    entity = nullptr;
+    time = 0;
+  }
+
+  ~DrawSomeTime() {
+    
+  }
+
+  void SetEntity(se::Renderable *entity) {
+    this->entity = entity;
+    firstTime = GetTickCount();
+  }
+
+  se::Renderable *entity;
+  DWORD time;
+  DWORD firstTime;
+};
+
 
 std::pair<KeySphere, Skill *> skills;
-
-bool CheckCollision(PhysicsObject& first, PhysicsObject &second) {
-	unsigned int width = first.GetX() + first.GetWidth();
-	unsigned int height = first.GetY() + first.GetHeight();
-	unsigned int aWidth = second.GetX() + second.GetWidth();
-	unsigned int aHeight = second.GetY() + second.GetHeight();
-
-	return (first.GetX() < aWidth && first.GetY() < aHeight && second.GetX() < width && second.GetY() < height);
-}
 
 void InitSkills() {
   // Meteor
@@ -34,33 +54,37 @@ void DeinitSkills() {
 int main() {
   InitSkills();
   srand(time(NULL));
-  se::Window window(L"Test");
+  se::Window window(L"Untitled Game", 1024, 768, false);
 
   const se::Input &input = window.GetInput();
   se::Camera &camera = window.GetCamera();
   KeySphere currentSphere;
 
-  se::String testString;
-  testString.SetFont(window.GetDC(), L"Courier New");
+  std::shared_ptr<se::Font> font(new se::Font(window.GetDC(), L"Courier New", 18));
   
   se::Image playerImg;
   playerImg.LoadFromFile("img\\player.png");
-  Player player(50, 0, 0);
-  Player enemies[10];
+  Player player(50, window.GetHeight()/3, 0);
+  vector<Player> enemies;
   for (int i = 0; i < 10; i++) {
-    enemies[i].SetX((i+1)*80);
-    enemies[i].SetImage(playerImg);
+    Player enemy;
+    enemy.SetX((i+1)*80);
+    enemy.SetImage(playerImg);
+    enemy.SetY(window.GetHeight()/2);
+    enemies.push_back(enemy);
   }
   player.SetImage(playerImg);
   
   se::Sprite spheres[3];
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     spheres[i].SetY(window.GetHeight()-50);
+    spheres[i].SetFixedMode(true);
+  }
   
   se::Image images[3];
-  images[0].LoadFromFile("img\\fire.png");
-  images[1].LoadFromFile("img\\ice.png");
-  images[2].LoadFromFile("img\\lighting.png");
+  images[0].LoadFromFile("img\\f1.png");
+  images[1].LoadFromFile("img\\l1.png");
+  images[2].LoadFromFile("img\\m1.png");
   
   int castType;
   bool k1p;
@@ -71,8 +95,15 @@ int main() {
   bool castingSkill = false;
   bool isDamaged = false;
 
+  se::Sprite floor(0, 0, window.GetWidth(), window.GetHeight()/4, se::Color(0.5f, 0.5f, 0.5f), true);
+
+  std::vector<DrawSomeTime> damageString;
+
+  // FIXME: Improve gameloop :3
   while (window.IsOpened()) {
     window.ProcessEvents();
+
+    if (!window.IsActive()) continue;
     
     castType = 0;
 
@@ -92,11 +123,15 @@ int main() {
     }
 
     if (input.IsKeyPressed('W')) player.Jump();
-    if (input.IsKeyPressed('A')) { player.Move(-1, 0); player.FlipX(true); }
-    if (input.IsKeyPressed('D')) { player.Move(1, 0); player.FlipX(false); }
+    if (input.IsKeyPressed('A')) { player.Move(-3, 0); player.FlipX(true); }
+    if (input.IsKeyPressed('D')) { player.Move(3, 0); player.FlipX(false); }
+    if (input.IsKeyPressed(VK_ESCAPE)) { PostQuitMessage(0); }
 
-    if (player.GetX() >= window.GetWidth()/2 + camera.GetViewX()) camera.OffsetViewByX(player.GetX() - window.GetWidth()/2);
-    else if (player.GetX() <= window.GetWidth()/2) camera.SetViewPoint(se::Vertex2D(0, 0));
+    unsigned int middle = window.GetWidth()/2 + camera.GetViewX();
+    if (player.GetX() <= window.GetWidth()/2)
+      camera.SetViewPoint(se::Vertex2D(0, 0));
+    else
+      camera.OffsetViewByX(player.GetX() - middle);
 
     // Key-hack for testing
     if (input.IsKeyPressed(VK_F1)) { currentSphere.k1 = 2; currentSphere.k2 = 1; currentSphere.k3 = 0; castingSkill = true; };
@@ -107,16 +142,36 @@ int main() {
       spheres[count].SetX(50*count);
     }
 
-    player.Tick();
+    player.Tick(1, &floor);
 
-    window.Clear(se::Color(0.0f, 0.0f, 0.0f));
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      it->Tick(1, &floor);
+
+    // TODO : Erase all dead enemies from vector [amazing stuff, but I think that it costs a lot of time]
+    // TODO : Will check it later.
+    enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](Player t) { return !t.IsAlive(); }), enemies.end());
+    damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
+    
+    for (auto t = enemies.begin(); t != enemies.end(); t++) {
+      if (GetTickCount() - t->damageTime > 2000 && t->damageTime != 0) {
+        t->damageTime = 0;
+        t->SetColor(se::Color(1.0f, 1.0f, 1.0f));
+      }
+    }
+
+    window.Clear();
 
     // Drawing player
     window.Draw(&player);
 
-    for (int i = 0; i < 10; i++)
-      if (enemies[i].IsAlive())
-	      window.Draw(&enemies[i]);
+    // Drawing floor
+    window.Draw(&floor);
+
+    // Drawing enemies
+    for (auto it = enemies.begin(); it != enemies.end(); it++) {
+	    window.Draw(&(*it));
+      it->DrawHealth(window);
+    }
     
     // Drawing spheres
     for (int i = 0; i < currentSphere.GetCount(); i++)
@@ -131,22 +186,31 @@ int main() {
       castingSkill = isDamaged = false;
     }
 
+    // If skill casting draw skill, and check on collision
     if (skills.second->casting) {
-      skills.second->Tick(window);
-      for (int i = 0; i < 10; i++)
-	      if (CheckCollision(enemies[i], *skills.second) && enemies[i].IsAlive() && !isDamaged) {
-          wchar_t text[5];
-          wsprintf(text, L"%d", skills.second->GetDamage());
-          enemies[i].DamageHim(skills.second->GetDamage());
-          testString.SetText(text);
-          testString.SetX(enemies[i].GetX()+enemies[i].GetWidth()-camera.GetViewX());
-          testString.SetY(enemies[i].GetY()+enemies[i].GetHeight()-camera.GetViewY()+10);
-          testString.Render();
-          isDamaged = true;
-        }
+      skills.second->Tick(window, 1, &floor);
+      if (!skills.second->casting) {
+        int left = skills.second->GetX() - skills.second->GetRange();
+        int right = skills.second->GetX() + skills.second->GetWidth() + skills.second->GetRange();
+        for (auto it = enemies.begin(); it != enemies.end(); it++)
+          if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
+            wchar_t text[5];
+            wsprintf(text, L"%d", skills.second->GetDamage());
+            damageString.push_back(DrawSomeTime(new se::String(text, font.get(), it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(0.0f, 0.0f, 0.0f), false), 1000));
+
+            it->DamageHim(skills.second->GetDamage());
+          }
+      }
     }
 
+    //window.Draw(&testString);
+    for (auto it = damageString.begin(); it != damageString.end(); it++)
+      if (it->entity != nullptr)
+        window.Draw(it->entity);
+
     window.Display();
+
+    // For 60 FPS
     Sleep(15);
   }
 
