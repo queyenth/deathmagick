@@ -46,7 +46,7 @@ public:
    * @param height : высота окна (по умолчанию 480)
    * @param bits : глубина окна (по умолчанию 640)
    */
-  Window(wstring name, unsigned int width=640, unsigned int height=480, int bits=32);
+  Window(wstring name, unsigned int width=640, unsigned int height=480, bool fullscreen=false, int bits=32);
 
   /**
    * @brief Метод, который создает окно, и устанавливает на него фокус
@@ -87,6 +87,8 @@ public:
    */
   bool IsOpened() const;
 
+  bool IsActive() const;
+
   /**
    * @brief Для real-time handling input
    *
@@ -120,11 +122,15 @@ public:
   HWND GetHandle() const;
 
   HDC GetDC() const;
+
+  void KillWindow();
 private:
   /**
    * @brief Инициализирует OpenGL
    */
   void InitGL();
+
+  void ResizeWindow(int width, int height);
 
   /**
    * @brief Обрабатывает сообщения, приходящие от окна
@@ -143,11 +149,6 @@ private:
    */
   static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-  /**
-   * @brief Очистка
-   */
-  void Cleanup();
-
   /// Инпут окна
   Input input;
 
@@ -157,9 +158,6 @@ private:
   /// инстанс окна
   HINSTANCE hInstance;
 
-  /// прямоугольная область окна
-  RECT windowRect;
-
   /// ширина окна
   unsigned int width;
 
@@ -168,11 +166,10 @@ private:
 
   int bits;
 
-  /// формат пикселя
-  int PixelFormat;
-
   /// флаг, показывающий открыто ли окно
   bool isOpened;
+  bool fullscreen;
+  bool isActive;
 
   /// имя окна
   wstring nameOfWindow;

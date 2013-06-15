@@ -47,12 +47,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
  * @brief Деструктор
  */
 Window::~Window() {
-  if (hWnd)
-    DestroyWindow(hWnd);
-
-  if (hWnd)
-    DestroyWindow(hWnd);
-  UnregisterClass(nameOfWindow.c_str(), GetModuleHandle(NULL));
+  KillWindow();
 }
 
 /**
@@ -63,28 +58,24 @@ Window::~Window() {
  * @param height : высота окна (по умолчанию 480)
  * @param bits : глубина окна (по умолчанию 640)
  */
-Window::Window(wstring name, unsigned int width, unsigned int height, int bits) : camera(0, 0) {
+Window::Window(wstring name, unsigned int width, unsigned int height, bool fullscreen, int bits) : camera(0, 0) {
   hWnd = NULL;
   hInstance = GetModuleHandle(NULL);
   this->width = width;
   this->height = height;
   this->bits = bits;
+  this->fullscreen = fullscreen;
+  isActive = true;
   nameOfWindow = name;
   isOpened = true;
-  windowRect.left = (long)0;
-  windowRect.right = (long)width;
-  windowRect.top = (long)0;
-  windowRect.bottom = (long)height;
-  AdjustWindowRectEx(&windowRect, WS_OVERLAPPEDWINDOW, FALSE, WS_EX_APPWINDOW | WS_EX_WINDOWEDGE);
   CreateUserWindow();
-  InitGL();
 }
 
 /**
  * @brief Метод, который создает окно, и устанавливает на него фокус
  */
 void Window::CreateUserWindow() {
-  WNDCLASS wc;
+  WNDCLASSEX wc;
   wc.cbClsExtra = 0;
   wc.cbWndExtra = 0;
   wc.hCursor = LoadCursor(NULL, IDC_ARROW);
@@ -95,16 +86,63 @@ void Window::CreateUserWindow() {
   wc.lpszClassName = nameOfWindow.c_str();
   wc.lpszMenuName = NULL;
   wc.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
+  wc.cbSize = sizeof(wc);
+  wc.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
+  
+  if (!RegisterClassEx(&wc)) {
+    MessageBox(NULL, L"Failed To Register A Window Class.", nameOfWindow.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    exit(1);
+  }
 
-  RegisterClass(&wc);
+  if (fullscreen) {
+    DEVMODE dm;
+    memset(&dm, 0, sizeof(dm));
+    dm.dmSize = sizeof(dm);
+    dm.dmBitsPerPel = bits;
+    dm.dmPelsHeight = height;
+    dm.dmPelsWidth = width;
+    dm.dmFields = DM_BITSPERPEL | DM_PELSHEIGHT | DM_PELSWIDTH;
+    if (ChangeDisplaySettings(&dm, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL) {
+      if (MessageBox(NULL, L"Fullscreen doesn't support.\nRun in windowed mode?", nameOfWindow.c_str(), MB_YESNO | MB_ICONEXCLAMATION)==IDYES)
+        fullscreen = false;
+      else {
+        MessageBox(NULL, L"Programm Will Now Close", nameOfWindow.c_str(), MB_OK | MB_ICONSTOP);
+        exit(1);
+      }
+    }
+  }
 
-  hWnd = CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
+  DWORD dwExStyle = WS_EX_APPWINDOW;
+  DWORD dwStyle;
+
+  if (fullscreen) {
+    dwStyle = WS_POPUP;
+    ShowCursor(FALSE);
+  }
+  else {
+    dwExStyle |= WS_EX_WINDOWEDGE;
+    dwStyle = WS_OVERLAPPEDWINDOW;
+  }
+
+  RECT windowRect;
+  windowRect.left = (long)0;
+  windowRect.right = (long)width;
+  windowRect.top = (long)0;
+  windowRect.bottom = (long)height;
+
+  AdjustWindowRectEx(&windowRect, dwStyle, FALSE, dwExStyle);
+
+  if (!(hWnd = CreateWindowEx(dwExStyle,
       wc.lpszClassName, wc.lpszClassName,
-      WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+      dwStyle | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
       0, 0,
       windowRect.right - windowRect.left,
       windowRect.bottom - windowRect.top,
-      NULL, NULL, hInstance, this);
+      NULL, NULL, hInstance, this))) {
+        KillWindow();
+        MessageBox(NULL, L"Failed To Create a Window.", nameOfWindow.c_str(), MB_OK | MB_ICONEXCLAMATION);
+        exit(1);
+  }
 
   static PIXELFORMATDESCRIPTOR pfd =
   {
@@ -128,15 +166,42 @@ void Window::CreateUserWindow() {
     0, 0, 0
   };
 
-  hDC = ::GetDC(hWnd);
-  PixelFormat = ChoosePixelFormat(hDC, &pfd);
-  SetPixelFormat(hDC, PixelFormat, &pfd);
-  hRC = wglCreateContext(hDC);
-  wglMakeCurrent(hDC, hRC);
+  if (!(hDC = ::GetDC(hWnd))) {
+    KillWindow();
+    MessageBox(NULL, L"Can't Create A GL Device Context", nameOfWindow.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    exit(1);
+  }
+
+  GLuint PixelFormat;
+  if (!(PixelFormat = ChoosePixelFormat(hDC, &pfd))) {
+    KillWindow();
+    MessageBox(NULL, L"Can't Find A Suitable PixelFormat.", nameOfWindow.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    exit(1);
+  }
+
+  if (!SetPixelFormat(hDC, PixelFormat, &pfd)) {
+    KillWindow();
+    MessageBox(NULL, L"Can't Set The PixelFormat", nameOfWindow.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    exit(1);
+  }
+
+  if (!(hRC = wglCreateContext(hDC))) {
+    KillWindow();
+    MessageBox(NULL, L"Can't Create A GL Rendering Context", nameOfWindow.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    exit(1);
+  }
+
+  if (!wglMakeCurrent(hDC, hRC)) {
+    KillWindow();
+    MessageBox(NULL, L"Can't Activate The GL Rendering Context", nameOfWindow.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    exit(1);
+  }
 
   ShowWindow(hWnd, SW_SHOW);
   SetForegroundWindow(hWnd);
   SetFocus(hWnd);
+  ResizeWindow(width, height);
+  InitGL();
 }
 
 /**
@@ -162,6 +227,10 @@ void Window::ProcessEvents(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     return ;
 
   switch (uMsg) {
+    case WM_MOUSEMOVE:
+      input.SetMouseX(GET_X_LPARAM(lParam));
+      input.SetMouseY(GET_Y_LPARAM(lParam));
+      break;
     case WM_KEYDOWN:
       input.PressKey(wParam);
       break;
@@ -171,43 +240,66 @@ void Window::ProcessEvents(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_LBUTTONDOWN:
       input.PressLeftMouse();
       break;
-    case WM_RBUTTONDOWN:
-      input.PressRightMouse();
-      break;
     case WM_LBUTTONUP:
       input.UnPressLeftMouse();
+      break;
+    case WM_RBUTTONDOWN:
+      input.PressRightMouse();
       break;
     case WM_RBUTTONUP:
       input.UnPressRightMouse();
       break;
-    case WM_MOUSEMOVE:
-      input.SetMouseX(GET_X_LPARAM(lParam));
-      input.SetMouseY(GET_Y_LPARAM(lParam));
+    case WM_ACTIVATE:
+      if (!HIWORD(wParam))
+        isActive = true;
+      else
+        isActive = false;
       break;
     case WM_CLOSE:
       isOpened = false;
-      Cleanup();
       break;
     case WM_SIZE:
-      glViewport(0, 0, LOWORD(lParam), HIWORD(lParam));
+      ResizeWindow(LOWORD(lParam), HIWORD(lParam));
+      break;
+    case WM_SYSCOMMAND:
+      switch (wParam) {
+      case SC_SCREENSAVE:
+      case SC_MONITORPOWER:
+        break;
+      }
       break;
     default:
       break;
   }
 }
 
-/**
- * @brief Очистка
- */
-void Window::Cleanup() {
-  ShowCursor(TRUE);
+void Window::ResizeWindow(int width, int height) {
+  glViewport(0, 0, width, height);
+}
+
+void Window::KillWindow() {
+  if (fullscreen) {
+    ChangeDisplaySettings(NULL, 0);
+    ShowCursor(TRUE);
+  }
   if (hRC) {
-    wglDeleteContext(hRC);
+    if (!wglMakeCurrent(NULL, NULL))
+      MessageBox(NULL, L"Release Of DC And RC Failed.", nameOfWindow.c_str(), MB_OK | MB_ICONINFORMATION);
+    if (!wglDeleteContext(hRC))
+      MessageBox(NULL, L"Release Rendering Context Failed.", nameOfWindow.c_str(), MB_OK | MB_ICONINFORMATION);
     hRC = NULL;
   }
-  if (hDC) {
-    ReleaseDC(hWnd, hDC);
+  if (hDC && !ReleaseDC(hWnd, hDC)) {
+    MessageBox(NULL, L"Release Of Device Context Failed.", nameOfWindow.c_str(), MB_OK | MB_ICONINFORMATION);
     hDC = NULL;
+  }
+  if (hWnd && !DestroyWindow(hWnd)) {
+    MessageBox(NULL, L"Could Not Release Window.", nameOfWindow.c_str(), MB_OK | MB_ICONINFORMATION);
+    hWnd = NULL;
+  }
+  if (!UnregisterClass(nameOfWindow.c_str(), hInstance)) {
+    MessageBox(NULL, L"Could Not Unregister Class.", nameOfWindow.c_str(), MB_OK | MB_ICONINFORMATION);
+    hInstance = NULL;
   }
 }
 
@@ -216,6 +308,10 @@ void Window::Cleanup() {
  */
 bool Window::IsOpened() const {
   return isOpened;
+}
+
+bool Window::IsActive() const {
+  return isActive;
 }
 
 /**
