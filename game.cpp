@@ -102,7 +102,17 @@ int main() {
   bool castingSkill = false;
   bool isDamaged = false;
 
-  se::Sprite floor(0, 0, window.GetWidth(), window.GetHeight()/4, se::Color(0.5f, 0.5f, 0.5f), true);
+  std::vector<se::Sprite> floors;
+  floors.push_back(se::Sprite(0, 0, 4000, window.GetHeight()/4, se::Color(0.5f, 0.5f, 0.5f), true));
+  floors.push_back(se::Sprite(250, window.GetHeight()/4, 100, 50, se::Color(0.5f, 0.5f, 0.5f), false));
+  floors.push_back(se::Sprite(860, 400, 200, 50, se::Color(0.5f, 0.5f, 0.5f), false));
+
+  se::Sprite stair(880, window.GetHeight()/4);
+  se::Image stairImage;
+  stairImage.LoadFromFile("img\\stair.png");
+  stair.SetImage(stairImage);
+  int stairHeight = floors[2].GetY()+floors[2].GetHeight()+10-window.GetHeight()/4;
+
   se::Sprite health(0, window.GetHeight()-10, player.GetHealth(), 10, se::Color(0.8f, 0.2f, 0.2f), true);
 
   std::vector<DrawSomeTime> damageString;
@@ -110,15 +120,14 @@ int main() {
   se::Sprite backgrounds[2][15];
   se::Image leaf;
   leaf.LoadFromFile("img\\leaf.png");
-  for (int i = 0; i < 2; i++) {
-    for (int j = 0; j < 15; j++) {
+  for (int i = 0; i < 2; i++)
+      for (int j = 0; j < 15; j++) {
       backgrounds[i][j].SetX(rand()%window.GetWidth());
-      backgrounds[i][j].SetY(window.GetHeight()/4 + rand()%window.GetHeight());
+      backgrounds[i][j].SetY(window.GetHeight()/4 + rand()%(window.GetHeight()-window.GetHeight()/4));
       backgrounds[i][j].SetImage(leaf);
       backgrounds[i][j].Rotate(rand()%360+1);
       backgrounds[i][j].SetFixedMode(true);
     }
-  }
 
   int backgroundScroll1 = window.GetWidth()/2;
   int backgroundScroll2 = window.GetWidth();
@@ -146,9 +155,31 @@ int main() {
       if (!input.IsKeyPressed(51)) k3p = false;
     }
 
-    if (input.IsKeyPressed('W')) player.Jump();
-    if (input.IsKeyPressed('A')) { player.Move(-3, 0); player.FlipX(true); }
-    if (input.IsKeyPressed('D')) { player.Move(3, 0); player.FlipX(false); }
+    if (input.IsKeyPressed('W')) {
+      if (player.inAir == Player::ONSTAIR) {
+        player.Move(0, 3);
+      }
+      if (stair.GetX() <= player.GetX() && player.GetX() <= stair.GetX()+stair.GetWidth() && player.GetY() <= stair.GetY()+stair.GetHeight())
+        player.inAir = Player::ONSTAIR;
+      else if (player.inAir == Player::ONSTAIR)
+        player.inAir = Player::STADING;
+      else
+        player.Jump();
+    }
+    if (input.IsKeyPressed('A')) {
+      if (player.GetX() - 3 > 2) {
+        player.TryToMove(-3, 0, floors);
+        player.FlipX(true);
+      }
+    }
+    if (input.IsKeyPressed('D')) {
+      player.TryToMove(3, 0, floors);
+      player.FlipX(false);
+    }
+    if (input.IsKeyPressed('S')) {
+      if (player.inAir == Player::ONSTAIR)
+        player.Move(0, -3);
+    }
 
     unsigned int middle = window.GetWidth()/2 + camera.GetViewX();
     if (player.GetX() <= window.GetWidth()/2)
@@ -165,49 +196,51 @@ int main() {
       spheres[count].SetX(50*count);
     }
 
-    player.Tick(1, &floor);
+    player.Tick(floors);
     health.SetWidth(player.GetHealth()*2);
-
-    for (auto it = enemies.begin(); it != enemies.end(); it++)
-      it->Tick(1, &floor);
 
     // TODO : Erase all dead enemies from vector [amazing stuff, but I think that it costs a lot of time]
     // TODO : Will check it later.
     enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](Player t) { return !t.IsAlive(); }), enemies.end());
     damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
-    
-    for (auto t = enemies.begin(); t != enemies.end(); t++) {
-      if (GetTickCount() - t->damageTime > 2000 && t->damageTime != 0) {
-        t->damageTime = 0;
-        t->SetColor(se::Color(1.0f, 1.0f, 1.0f));
+
+    for (auto i = enemies.begin(); i != enemies.end(); i++) {
+      i->Tick(floors);
+      if (GetTickCount() - i->damageTime > 2000 && i->damageTime != 0) {
+        i->damageTime = 0;
+        i->SetColor(se::Color(1.0f, 1.0f, 1.0f));
       }
     }
 
     for (int i = 0; i < 15; i++)
       backgrounds[0][i].SetX(backgroundScroll1);
-
     for (int i = 0; i < 15; i++)
       backgrounds[1][i].SetX(backgroundScroll2);
 
     window.Clear(se::Color(0.0f, 0.0f, 0.0f));
 
     // Drawing background
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 15; j++) {
+    for (int i = 0; i < 2; i++)
+      for (int j = 0; j < 15; j++)
         window.Draw(&backgrounds[i][j]);
-      }
+
+    // Drawing floor
+    for (auto i = floors.begin(); i != floors.end(); i++)
+      window.Draw(&*i);
+
+    // Drawing stairs
+    for (int i = 0; i <= stairHeight; i+=10) {
+      stair.SetY(window.GetHeight()/4+i);
+      window.Draw(&stair);
     }
 
     // Drawing player
     window.Draw(&player);
 
-    // Drawing floor
-    window.Draw(&floor);
-
     // Drawing enemies
-    for (auto it = enemies.begin(); it != enemies.end(); it++) {
-	    window.Draw(&(*it));
-      it->DrawHealth(window);
+    for (auto i = enemies.begin(); i != enemies.end(); i++) {
+	    window.Draw(&*i);
+      i->DrawHealth(window);
     }
     
     // Drawing spheres
@@ -228,23 +261,25 @@ int main() {
 
     // If skill casting draw skill, and check on collision
     if (skills.second->casting) {
-      skills.second->Tick(window, 1, &floor);
+      skills.second->Tick(window, floors);
       if (!skills.second->casting) {
         int left = skills.second->GetX() - skills.second->GetRange();
+        if (left <= 0) left = 0;
         int right = skills.second->GetX() + skills.second->GetWidth() + skills.second->GetRange();
-        for (auto it = enemies.begin(); it != enemies.end(); it++)
+        for (auto it = enemies.begin(); it != enemies.end(); it++) {
           if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
             wchar_t text[5];
             wsprintf(text, L"%d", skills.second->GetDamage());
             damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
             it->DamageHim(skills.second->GetDamage());
           }
+        }
       }
     }
 
-    for (auto it = damageString.begin(); it != damageString.end(); it++)
-      if (it->entity != nullptr)
-        window.Draw(it->entity.get());
+    for (auto i = damageString.begin(); i != damageString.end(); i++)
+      if (i->entity != nullptr)
+        window.Draw(i->entity.get());
 
     window.Display();
 
