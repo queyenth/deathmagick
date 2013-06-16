@@ -1,6 +1,11 @@
+#ifdef _DEBUG
+#include <crtdbg.h>
+#define _CRTDBG_MAP_ALLOC
+#define new new( _NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
 #include "Window.hpp"
 #include "Sprite.hpp"
-
 #include "KeySphere.h"
 #include "Meteor.h"
 #include "Player.h"
@@ -11,10 +16,9 @@
 #include <ctime>
 #include <algorithm>
 
-
 class DrawSomeTime {
 public:
-  DrawSomeTime(se::Renderable *entity, DWORD time) {
+  DrawSomeTime(std::shared_ptr<se::Renderable> entity, DWORD time) {
     SetEntity(entity);
     this->time = time;
   }
@@ -28,12 +32,12 @@ public:
     
   }
 
-  void SetEntity(se::Renderable *entity) {
+  void SetEntity(std::shared_ptr<se::Renderable> entity) {
     this->entity = entity;
     firstTime = GetTickCount();
   }
 
-  se::Renderable *entity;
+  std::shared_ptr<se::Renderable> entity;
   DWORD time;
   DWORD firstTime;
 };
@@ -52,6 +56,9 @@ void DeinitSkills() {
 }
 
 int main() {
+  _CrtMemState _ms;
+  _CrtMemCheckpoint(&_ms);
+
   InitSkills();
   srand(time(NULL));
   se::Window window(L"Untitled Game", 1024, 768, false);
@@ -60,7 +67,7 @@ int main() {
   se::Camera &camera = window.GetCamera();
   KeySphere currentSphere;
 
-  std::shared_ptr<se::Font> font(new se::Font(window.GetDC(), L"Courier New", 18));
+  se::Font *font = new se::Font(window.GetDC(), L"Courier New", 18);
   
   se::Image playerImg;
   playerImg.LoadFromFile("img\\player.png");
@@ -77,7 +84,7 @@ int main() {
   
   se::Sprite spheres[3];
   for (int i = 0; i < 3; i++) {
-    spheres[i].SetY(window.GetHeight()-50);
+    spheres[i].SetY(window.GetHeight()-60);
     spheres[i].SetFixedMode(true);
   }
   
@@ -96,8 +103,25 @@ int main() {
   bool isDamaged = false;
 
   se::Sprite floor(0, 0, window.GetWidth(), window.GetHeight()/4, se::Color(0.5f, 0.5f, 0.5f), true);
+  se::Sprite health(0, window.GetHeight()-10, player.GetHealth(), 10, se::Color(0.8f, 0.2f, 0.2f), true);
 
   std::vector<DrawSomeTime> damageString;
+
+  se::Sprite backgrounds[2][15];
+  se::Image leaf;
+  leaf.LoadFromFile("img\\leaf.png");
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < 15; j++) {
+      backgrounds[i][j].SetX(rand()%window.GetWidth());
+      backgrounds[i][j].SetY(window.GetHeight()/4 + rand()%window.GetHeight());
+      backgrounds[i][j].SetImage(leaf);
+      backgrounds[i][j].Rotate(rand()%360+1);
+      backgrounds[i][j].SetFixedMode(true);
+    }
+  }
+
+  int backgroundScroll1 = window.GetWidth()/2;
+  int backgroundScroll2 = window.GetWidth();
 
   // FIXME: Improve gameloop :3
   while (window.IsOpened()) {
@@ -125,7 +149,6 @@ int main() {
     if (input.IsKeyPressed('W')) player.Jump();
     if (input.IsKeyPressed('A')) { player.Move(-3, 0); player.FlipX(true); }
     if (input.IsKeyPressed('D')) { player.Move(3, 0); player.FlipX(false); }
-    if (input.IsKeyPressed(VK_ESCAPE)) { PostQuitMessage(0); }
 
     unsigned int middle = window.GetWidth()/2 + camera.GetViewX();
     if (player.GetX() <= window.GetWidth()/2)
@@ -143,6 +166,7 @@ int main() {
     }
 
     player.Tick(1, &floor);
+    health.SetWidth(player.GetHealth()*2);
 
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       it->Tick(1, &floor);
@@ -159,7 +183,20 @@ int main() {
       }
     }
 
-    window.Clear();
+    for (int i = 0; i < 15; i++)
+      backgrounds[0][i].SetX(backgroundScroll1);
+
+    for (int i = 0; i < 15; i++)
+      backgrounds[1][i].SetX(backgroundScroll2);
+
+    window.Clear(se::Color(0.0f, 0.0f, 0.0f));
+
+    // Drawing background
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 15; j++) {
+        window.Draw(&backgrounds[i][j]);
+      }
+    }
 
     // Drawing player
     window.Draw(&player);
@@ -176,6 +213,9 @@ int main() {
     // Drawing spheres
     for (int i = 0; i < currentSphere.GetCount(); i++)
       window.Draw(&spheres[i]);
+    
+    // Drawing health bar
+    window.Draw(&health);
 
     // Drawing skill
     if (castingSkill) {
@@ -196,24 +236,33 @@ int main() {
           if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
             wchar_t text[5];
             wsprintf(text, L"%d", skills.second->GetDamage());
-            damageString.push_back(DrawSomeTime(new se::String(text, font.get(), it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(0.0f, 0.0f, 0.0f), false), 1000));
-
+            damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
             it->DamageHim(skills.second->GetDamage());
           }
       }
     }
 
-    //window.Draw(&testString);
     for (auto it = damageString.begin(); it != damageString.end(); it++)
       if (it->entity != nullptr)
-        window.Draw(it->entity);
+        window.Draw(it->entity.get());
 
     window.Display();
+
+    backgroundScroll1--;
+    backgroundScroll2--;
+    if (backgroundScroll1 < 0) {
+      backgroundScroll1 = window.GetWidth();
+    }
+    if (backgroundScroll2 < 0) {
+      backgroundScroll2 = window.GetWidth();
+    }
 
     // For 60 FPS
     Sleep(15);
   }
 
   DeinitSkills();
+  delete font;
+  _CrtMemDumpAllObjectsSince(&_ms);
   return 0;
 }
