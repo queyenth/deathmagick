@@ -1,20 +1,32 @@
 #include "PhysicsObject.h"
 
-void PhysicsObject::Tick(int count, ...) {
-  va_list vl;
-  se::Renderable *value;
+PhysicsObject::PhysicsObject(int x, int y, int maxJump) : se::Sprite(x, y), inAir(STADING), maxJump(maxJump), currentJump(0) {}
+
+void PhysicsObject::TryToMove(unsigned int offsetX, unsigned int offsetY, std::vector<se::Sprite> &floors) {
+  this->Move(offsetX, offsetY);
+  bool canMove = true;
+  for (auto i = floors.begin(); i != floors.end(); i++)
+    if (CheckCollision(*this, *i)) {
+      canMove = false;
+      break;
+    }
+  if (!canMove)
+    this->Move(-offsetX, -offsetY);
+}
+
+void PhysicsObject::Tick(std::vector<se::Sprite> &things) {
+  bool floorUnderFoot = false;
   switch (inAir) {
   case STADING:
     SetY(y - G);
-    va_start(vl, count);
-    for (int i = 0; i < count; i++) {
-      value = va_arg(vl, se::Renderable *);
-      if (!CheckCollision(*this, *value)) {
-        inAir = FALLING;
-        return ;
+    for (auto i = things.begin(); i != things.end(); i++)
+      if (CheckCollision(*this, *i)) {
+        floorUnderFoot = true;
+        break;
       }
-    }
     SetY(y + G);
+    if (!floorUnderFoot)
+      inAir = FALLING;
     break;
   case INAIR:
     if (currentJump <= 0)
@@ -22,21 +34,22 @@ void PhysicsObject::Tick(int count, ...) {
     else {
       currentJump -= G;
       SetY(y + currentJump);
+      for (auto i = things.begin(); i != things.end(); i++)
+        if (CheckCollision(*this, *i))
+          inAir = FALLING;
+      break;
     }
     break;
   case FALLING:
     currentJump += G;
     SetY(y - currentJump);
-    va_start(vl, count);
-    for (int i = 0; i < count; i++) {
-      value = va_arg(vl, se::Renderable *);
-      if (CheckCollision(*this, *value)) {
-        SetY(value->GetY()+value->GetHeight());
+    for (auto i = things.begin(); i != things.end(); i++)
+      if (CheckCollision(*this, *i)) {
+        SetY(i->GetY()+i->GetHeight());
         inAir = STADING;
-        return ;
       }
-    }
-    va_end(vl);
+    break;
+  case ONSTAIR:
     break;
   }
 }

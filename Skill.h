@@ -18,7 +18,7 @@ public:
   virtual ~Skill() {}
 
   virtual void Cast(Player &) = 0;
-  virtual void Tick(se::Window &, int count, ...) = 0;
+  virtual void Tick(se::Window &, std::vector<se::Sprite> &things) = 0;
   
   virtual int GetDamage() {
     return damage;
