@@ -25,8 +25,10 @@ void PhysicsObject::Tick(std::vector<se::Sprite> &things) {
         break;
       }
     SetY(y + G);
-    if (!floorUnderFoot)
+    if (!floorUnderFoot) {
       inAir = FALLING;
+      currentJump = 0;
+    }
     break;
   case INAIR:
     if (currentJump <= 0)
