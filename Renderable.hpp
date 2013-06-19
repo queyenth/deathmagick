@@ -127,7 +127,7 @@ public:
    * @param offsetX : смещение по X
    * @param offsetY : смещение по Y
    */
-  void Move(unsigned int offsetX, unsigned int offsetY);
+  void Move(int offsetX, int offsetY);
 
   /**
    * @brief Поворачивает объект

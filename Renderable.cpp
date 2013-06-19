@@ -48,7 +48,7 @@ Renderable::~Renderable() {
  * @param offsetX : смещение по X
  * @param offsetY : смещение по Y
  */
-void Renderable::Move(unsigned int offsetX, unsigned int offsetY) {
+void Renderable::Move(int offsetX, int offsetY) {
   SetX(x + offsetX);
   SetY(y + offsetY);
 }
@@ -166,8 +166,10 @@ void Renderable::Draw(Camera &camera) const {
 
   // Если положение объекта изменилось, или изменилась камера, МОДИФИЦИРУЕМ МАТРИЦУ FUCK YEAH
   if (camera.Changed() || positionChanged) {
-    matrix.Set(12, isFixed ? x : x-camera.GetViewX());
-    matrix.Set(13, isFixed ? y : y-camera.GetViewY());
+    int newX = isFixed ? x : x - camera.GetViewX();
+    int newY = isFixed ? y : y - camera.GetViewY();
+    matrix.Set(12, newX);
+    matrix.Set(13, newY);
     positionChanged = false;
   }
 
@@ -250,10 +252,8 @@ bool Renderable::IsFlippedY() const {
 }
 
 void Renderable::InitTextureRect() {
-  textureRect.left = 0;
-  textureRect.right = 1;
-  textureRect.top = 0;
-  textureRect.bottom = 1;
+  textureRect.left = textureRect.top = 0.0f;
+  textureRect.right = textureRect.bottom = 1.0f;
 }
 
 }

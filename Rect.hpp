@@ -28,28 +28,28 @@ public:
    * @brief Конструктор
    */
   Rect() {
-    left = right = top = bottom = 0;
+    left = right = top = bottom = 0.0f;
   }
 
   /**
    * @brief Конструктор, устанавливающий все вершины прямоугольника
    */
-  Rect(unsigned int left, unsigned int top, unsigned int right, unsigned int bottom)
+  Rect(float left, float top, float right, float bottom)
     : left(left), right(right), top(top), bottom(bottom) {
 
   }
 
   /// Координата левой стороны
-  unsigned int left;
+  float left;
 
   /// Координата правой стороны
-  unsigned int right;
+  float right;
 
   /// Координата верхней стороны
-  unsigned int top;
+  float top;
 
   /// Координата нижней стороны
-  unsigned int bottom;
+  float bottom;
 };
 
 }
