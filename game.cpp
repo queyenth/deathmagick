@@ -11,6 +11,7 @@
 #include "Player.h"
 #include "String.hpp"
 #include "Button.h"
+#include "Line.h"
 
 #include <utility>
 #include <vector>
@@ -56,38 +57,39 @@ void DeinitSkills() {
   delete skills.second;
 }
 
-enum GameState { MENU, PAUSE, ARENA_INIT, ARENA_PLAY, QUIT };
-GameState currentState = MENU;
+enum GameState { MENU_INIT, MENU, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT };
+GameState currentState = MENU_INIT;
 
-se::Window window(L"Untitled Game", 1024, 768, false);
+se::Window window(L"Untitled Game", 640, 480, false);
 const se::Input &input = window.GetInput();
 se::Camera &camera = window.GetCamera();
-se::Font *font = new se::Font(window.GetDC(), L"Courier New", 18);
-int backgroundScroll1 = window.GetWidth()/2;
-int backgroundScroll2 = window.GetWidth();
+se::Font *font;
+int backgroundScroll1;
+int backgroundScroll2;
 se::Image playerImg;
-Player player(50, window.GetHeight()/3, 0);
+Player player;
 vector<Player> enemies;
 se::Sprite spheres[3];
 se::Image images[3];
 bool k1p, k2p, k3p;
 bool castingSkill = false;
 KeySphere currentSphere;
-std::vector<se::Sprite> floors;
+std::vector<PhysicsObject *> floors;
 se::Sprite stair(880, window.GetHeight()/4);
 se::Image stairImage;
 se::Sprite health(0, window.GetHeight()-10, player.GetHealth(), 10, se::Color(0.8f, 0.2f, 0.2f), true);
 int stairHeight;
 std::vector<DrawSomeTime> damageString;
-se::Sprite backgrounds[2][15];
-se::Image leaf;
-se::Image playImage,arenaImage,quitImage,backimage;
+se::Image playImage,arenaImage,quitImage,backimage,continImage,skillsImage;
 se::Sprite backMenu = se::Sprite(0, 0, window.GetWidth(), window.GetHeight());
+se::Sprite backgrounds[2];
+se::Image backgroundImage;
 
 void InitEnemies() {
+  playerImg.LoadFromFile("img\\player.png");
   for (int i = 0; i < 10; i++) {
     Player enemy;
-    enemy.SetX((i+1)*80);
+    enemy.SetX((i+1)*300);
     enemy.SetImage(playerImg);
     enemy.SetY(window.GetHeight()/2);
     enemies.push_back(enemy);
@@ -97,30 +99,32 @@ void InitEnemies() {
 void InitPlayer() {
   playerImg.LoadFromFile("img\\player.png");
   player.SetImage(playerImg);
+  player.SetX(5);
+  player.SetY(window.GetHeight()/3);
+  player.health = 100;
+  player.experience = 0;
 }
 
 void InitStairs() {
-  stairImage.LoadFromFile("img\\stair.png");
-  stair.SetImage(stairImage);
-  stairHeight = floors[2].GetY()+floors[2].GetHeight()+10-window.GetHeight()/4;
+  //stairImage.LoadFromFile("img\\stair.png");
+  //stair.SetImage(stairImage);
+  //stairHeight = floors[2].GetY()+floors[2].GetHeight()+10-window.GetHeight()/4;
 }
 
+// FIXME: Fuuuck, I can't but I must, fucking shit :D
 void InitBackgrounds() {
-  leaf.LoadFromFile("img\\leaf.png");
-  for (int i = 0; i < 2; i++)
-      for (int j = 0; j < 15; j++) {
-      backgrounds[i][j].SetX(rand()%window.GetWidth());
-      backgrounds[i][j].SetY(window.GetHeight()/4 + rand()%(window.GetHeight()-window.GetHeight()/4));
-      backgrounds[i][j].SetImage(leaf);
-      backgrounds[i][j].Rotate(rand()%360+1);
-      backgrounds[i][j].SetFixedMode(true);
-    }
+  backgroundImage.LoadFromFile("img\\arena_back.png");
+  for (int i = 0; i < 2; i++) {
+    backgrounds[i].SetImage(backgroundImage);
+    backgrounds[i].SetWidth(window.GetWidth());
+    backgrounds[i].SetHeight(window.GetHeight());
+    backgrounds[i].SetFixedMode(false);
+  }
+  backgrounds[1].SetX(window.GetWidth());
 }
 
 void InitFloors() {
-  floors.push_back(se::Sprite(0, 0, 4000, window.GetHeight()/4, se::Color(0.5f, 0.5f, 0.5f), true));
-  floors.push_back(se::Sprite(250, window.GetHeight()/4, 100, 100, se::Color(0.5f, 0.5f, 0.5f), false));
-  floors.push_back(se::Sprite(860, 400, 200, 50, se::Color(0.5f, 0.5f, 0.5f), false));
+  floors.push_back(new se::Line(0, 4000, window.GetHeight()/4-50));
 }
 
 void InitSpheres() {
@@ -146,11 +150,21 @@ void QuitPressed(void *data) {
   currentState = QUIT;
 }
 
+void ContinuePressed(void *data) {
+  currentState = ARENA_PLAY;
+}
+
+void SkillsPressed(void *data) {
+  currentState = SKILLS;
+}
+
 void InitMenuImages() {
   playImage.LoadFromFile("img\\playButton.png");
   arenaImage.LoadFromFile("img\\arenaButton.png");
   quitImage.LoadFromFile("img\\quitButton.png");
   backimage.LoadFromFile("img\\back.png");
+  continImage.LoadFromFile("img\\contin.png");
+  skillsImage.LoadFromFile("img\\skills.png");
 
   backMenu.SetImage(backimage);
 }
@@ -196,6 +210,54 @@ void DrawMenu() {
   window.Display();
 }
 
+void DrawGameMenu() {
+  static Button contin = Button(continImage, ContinuePressed, window.GetWidth()/4, window.GetHeight()/2+75, 200, 50, se::Color());
+  static Button skills = Button(skillsImage, SkillsPressed, window.GetWidth()/4, window.GetHeight()/2-25, 200, 50, se::Color());
+  static Button quit = Button(quitImage, QuitPressed, window.GetWidth()/4, window.GetHeight()/2-125, 200, 50, se::Color());
+  static se::String experience = se::String(L"", font, 450, 300, se::Color(), true);
+
+  if (quit.OnHover(input.GetMouseX(), input.GetMouseY())) {
+    SetCursor(LoadCursor(NULL, IDC_HAND));
+    if (input.IsLeftMousePressed())
+      contin.OnClick(NULL);
+  }
+  else if (skills.OnHover(input.GetMouseX(), input.GetMouseY())) {
+    SetCursor(LoadCursor(NULL, IDC_HAND));
+    skills.Move(-1, -3);
+    if (input.IsLeftMousePressed())
+      skills.OnClick(NULL);
+    skills.Move(1, 3);
+  }
+  else if (quit.OnHover(input.GetMouseX(), input.GetMouseY())) {
+    SetCursor(LoadCursor(NULL, IDC_HAND));
+    if (input.IsLeftMousePressed())
+      quit.OnClick(NULL);
+  }
+  else {
+    SetCursor(LoadCursor(NULL, IDC_ARROW));
+  }
+
+  wchar_t text[50];
+  wsprintf(text, L"Experience:%d", player.experience);
+  experience.SetText(text);
+
+  window.Clear();
+
+  window.Draw(&backMenu);
+
+  window.Draw(&contin);
+  window.Draw(&skills);
+  window.Draw(&quit);
+
+  window.Draw(&experience);
+
+  window.Display();
+}
+
+void DrawSkills() {
+
+}
+
 void DrawArena() {
 
   int castType = 0;
@@ -213,7 +275,12 @@ void DrawArena() {
     if (!input.IsKeyPressed(49)) k1p = false;
     if (!input.IsKeyPressed(50)) k2p = false;
     if (!input.IsKeyPressed(51)) k3p = false;
-   }
+  }
+  
+  if (input.IsKeyPressed(VK_ESCAPE)) {
+    currentState = GAME_MENU;
+    return;
+  }
 
   if (input.IsKeyPressed('W')) {
     if (stair.GetX() <= player.GetX() && player.GetX() <= stair.GetX() + stair.GetWidth()
@@ -229,10 +296,8 @@ void DrawArena() {
       player.Jump();
   }
   if (input.IsKeyPressed('A')) {
-    if (player.GetX() - 3 > 2) {
-      player.TryToMove(-3, 0, floors);
-      player.FlipX(true);
-    }
+    player.TryToMove(-3, 0, floors);
+    player.FlipX(true);
   }
   if (input.IsKeyPressed('D')) {
     player.TryToMove(3, 0, floors);
@@ -263,38 +328,48 @@ void DrawArena() {
 
   // TODO : Erase all dead enemies from vector [amazing stuff, but I think that it costs a lot of time]
   // TODO : Will check it later.
+  // FIXME: For every dying man we need get experience
+  
+  int countOfDied = 0;
+  for (auto i = enemies.begin(); i != enemies.end(); i++)
+    if (!i->IsAlive()) countOfDied++;
+
   enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](Player t) { return !t.IsAlive(); }), enemies.end());
   damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
+
+  player.experience += countOfDied*12;
   
   for (auto i = enemies.begin(); i != enemies.end(); i++) {
+    //i->AITick(floors);
     i->Tick(floors);
     if (GetTickCount() - i->damageTime > 2000 && i->damageTime != 0) {
       i->damageTime = 0;
       i->SetColor(se::Color(1.0f, 1.0f, 1.0f));
     }
+    if (player.CheckCollision(&*i) && GetTickCount() - player.damageTime > 500) {
+      player.DamageHim(15);
+      player.SetColor(se::Color());
+    }
   }
 
-  for (int i = 0; i < 15; i++)
-    backgrounds[0][i].SetX(backgroundScroll1);
-  for (int i = 0; i < 15; i++)
-    backgrounds[1][i].SetX(backgroundScroll2);
-
   window.Clear(se::Color(0.0f, 0.0f, 0.0f));
+
+  if (!player.IsAlive())
+    currentState = ARENA_DEINIT;
   
   // Drawing background
   for (int i = 0; i < 2; i++)
-    for (int j = 0; j < 15; j++)
-      window.Draw(&backgrounds[i][j]);
+    window.Draw(&backgrounds[i]);
 
   // Drawing floor
   for (auto i = floors.begin(); i != floors.end(); i++)
-    window.Draw(&*i);
+    window.Draw(*i);
   
   // Drawing stairs
-  for (int i = 0; i <= stairHeight; i+=10) {
+  /*for (int i = 0; i <= stairHeight; i+=10) {
     stair.SetY(window.GetHeight()/4+i);
     window.Draw(&stair);
-  }
+  }*/
 
   // Drawing player
   window.Draw(&player);
@@ -362,7 +437,6 @@ int main() {
   _CrtMemState _ms;
   _CrtMemCheckpoint(&_ms);
 
-  InitSkills();
   InitMenuImages();
   srand(time(NULL));
   
@@ -373,23 +447,45 @@ int main() {
     if (!window.IsActive()) continue;
     
     switch (currentState) {
+    case ARENA_PLAY:
+      DrawArena();
+      break;
     case MENU:
       DrawMenu();
+      break;
+    case MENU_INIT:
+      font = new se::Font(window.GetDC(), L"Courier New", 18);
+      ShowCursor(TRUE);
+      InitMenuImages();
+      currentState = MENU;
       break;
     case PAUSE:
       //DrawPause();
       break;
+    case GAME_MENU:
+      DrawGameMenu();
+      break;
+    case SKILLS:
+      //DrawSkills();
+      currentState = ARENA_PLAY;
+      break;
     case ARENA_INIT:
+      ShowCursor(FALSE);
       InitBackgrounds();
       InitFloors();
       InitStairs();
       InitPlayer();
       InitEnemies();
       InitSpheres();
+      InitSkills();
       currentState = ARENA_PLAY;
       break;
-    case ARENA_PLAY:
-      DrawArena();
+    case ARENA_DEINIT:
+      enemies.clear();
+      damageString.clear();
+      DeinitSkills();
+      for (auto i = floors.begin(); i != floors.end(); i++)
+        delete *i;
       break;
     case QUIT:
       exit(0);
@@ -397,7 +493,6 @@ int main() {
     }
   }
 
-  DeinitSkills();
   delete font;
   _CrtMemDumpAllObjectsSince(&_ms);
   return 0;
