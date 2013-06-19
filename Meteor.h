@@ -29,9 +29,9 @@ public:
     destination = IsFlippedX() ? LEFT : RIGHT;
   }
 
-  void Tick(se::Window &window, std::vector<se::Sprite> &things) override {
+  void Tick(se::Window &window, std::vector<PhysicsObject *> things) override {
     for (auto i = things.begin(); i != things.end(); i++) {
-      if (PhysicsObject::CheckCollision(*this, *i)) {
+      if ((*i)->CheckCollision(this)) {
         casting = false;
         return ;
       }
