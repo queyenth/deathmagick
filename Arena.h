@@ -6,6 +6,8 @@
 
 #include <algorithm>
 
+enum Destination { LEFT, RIGHT };
+
 int backgroundScroll1;
 int backgroundScroll2;
 se::Image playerImg;
@@ -23,6 +25,8 @@ int stairHeight;
 std::vector<DrawSomeTime> damageString;
 se::Sprite backgrounds[2];
 se::Image backgroundImage;
+int destination = RIGHT;
+bool moved = false;
 
 void InitEnemies() {
   playerImg.LoadFromFile("img\\player.png");
@@ -146,32 +150,14 @@ void DrawArena() {
   }
   if (input.IsKeyPressed('A')) {
     player.TryToMove(-3, 0, floors);
-    backgroundScroll1++;
-    backgroundScroll2++;
-    if (backgroundScroll1 > window.GetWidth()) {
-      backgroundScroll1 = -window.GetWidth();
-    }
-    if (backgroundScroll2 > window.GetWidth()) {
-      backgroundScroll2 = -window.GetWidth();
-    }
-
-    backgrounds[0].SetX(backgroundScroll1);
-    backgrounds[1].SetX(backgroundScroll2);
+    destination = LEFT;
+    moved = true;
     player.FlipX(true);
   }
   if (input.IsKeyPressed('D')) {
     player.TryToMove(3, 0, floors);
-    backgroundScroll1--;
-    backgroundScroll2--;
-    if (backgroundScroll1 < -window.GetWidth()) {
-      backgroundScroll1 = window.GetWidth();
-    }
-    if (backgroundScroll2 < -window.GetWidth()) {
-      backgroundScroll2 = window.GetWidth();
-    }
-
-    backgrounds[0].SetX(backgroundScroll1);
-    backgrounds[1].SetX(backgroundScroll2);
+    destination = RIGHT;
+    moved = true;
     player.FlipX(false);
   }
   if (input.IsKeyPressed('S')) {
@@ -182,8 +168,36 @@ void DrawArena() {
   int middle = window.GetWidth()/3 + camera.GetViewX();
   if (player.GetX() <= window.GetWidth()/3)
     camera.SetViewPoint(se::Vertex2D(0, 0));
-  else
+  else if (moved) {
     camera.OffsetViewByX(player.GetX() - middle);
+    if (destination == LEFT) {
+      backgroundScroll1++;
+      backgroundScroll2++;
+      if (backgroundScroll1 > window.GetWidth()) {
+        backgroundScroll1 = -window.GetWidth();
+      }
+      if (backgroundScroll2 > window.GetWidth()) {
+        backgroundScroll2 = -window.GetWidth();
+      }
+
+      backgrounds[0].SetX(backgroundScroll1);
+      backgrounds[1].SetX(backgroundScroll2);
+    }
+    else {
+      backgroundScroll1--;
+      backgroundScroll2--;
+      if (backgroundScroll1 < -window.GetWidth()) {
+        backgroundScroll1 = window.GetWidth();
+      }
+      if (backgroundScroll2 < -window.GetWidth()) {
+        backgroundScroll2 = window.GetWidth();
+      }
+
+      backgrounds[0].SetX(backgroundScroll1);
+      backgrounds[1].SetX(backgroundScroll2);
+    }
+    moved = false;
+  }
   
   // Key-hack for testing
   if (input.IsKeyPressed(VK_F1)) { currentSphere.k1 = 2; currentSphere.k2 = 1; currentSphere.k3 = 0; castingSkill = true; };
@@ -199,15 +213,10 @@ void DrawArena() {
 
   // TODO : Erase all dead enemies from vector [amazing stuff, but I think that it costs a lot of time]
   // TODO : Will check it later.
-  // FIXME: For every dying man we need get experience
-  
+
   int countOfDied = 0;
-  for (auto i = enemies.begin(); i != enemies.end(); i++)
-    if (!i->IsAlive()) countOfDied++;
-
-  enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](Player t) { return !t.IsAlive(); }), enemies.end());
+  enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&countOfDied](Player t) -> bool { if (!t.IsAlive()) countOfDied++; return !t.IsAlive(); }), enemies.end());
   damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
-
   player.experience += countOfDied*12;
   
   for (auto i = enemies.begin(); i != enemies.end(); i++) {
