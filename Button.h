@@ -10,7 +10,7 @@ public:
   }
   Button() : se::Sprite() {}
 
-  bool OnHover(unsigned int mouseX, unsigned int mouseY) {
+  bool OnHover(int mouseX, int mouseY) {
     return (x <= mouseX && mouseX <= x+GetWidth() && y <= mouseY && mouseY <= y+GetHeight());
   }
   

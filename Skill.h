@@ -29,9 +29,9 @@ public:
   }
 
   bool casting;
+  tagIMPR impr;
 protected:
   int damage;
   int range;
   Destination destination;
-  tagIMPR impr;
 };

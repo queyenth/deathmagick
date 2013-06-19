@@ -59,10 +59,10 @@ void Entity::Tick(std::vector<PhysicsObject *> things) {
 }
 
 bool Entity::CheckCollision(PhysicsObject *other) {
-  unsigned int width = GetX() + GetWidth();
-	unsigned int height = GetY() + GetHeight();
-	unsigned int aWidth = other->GetX() + other->GetWidth();
-	unsigned int aHeight = other->GetY() + other->GetHeight();
+  int width = GetX() + GetWidth();
+	int height = GetY() + GetHeight();
+	int aWidth = other->GetX() + other->GetWidth();
+	int aHeight = other->GetY() + other->GetHeight();
 
 	return (GetX() < aWidth && GetY() < aHeight && other->GetX() < width && other->GetY() < height);
 }

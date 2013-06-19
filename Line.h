@@ -29,10 +29,10 @@ private:
   void Render() const {
     glDisable(GL_TEXTURE_2D);
     glBegin(GL_QUADS);
-      glVertex2f(0.0f, 0.0f);
-      glVertex2f(GetWidth(), 0.0f);
-      glVertex2f(GetWidth(), GetHeight());
-      glVertex2f(0.0f, GetHeight());
+      glVertex2i(0, 0);
+      glVertex2i(GetWidth(), 0);
+      glVertex2i(GetWidth(), GetHeight());
+      glVertex2i(0, GetHeight());
     glEnd();
   }
 };

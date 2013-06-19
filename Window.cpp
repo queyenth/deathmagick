@@ -58,7 +58,7 @@ Window::~Window() {
  * @param height : высота окна (по умолчанию 480)
  * @param bits : глубина окна (по умолчанию 640)
  */
-Window::Window(wstring name, unsigned int width, unsigned int height, bool fullscreen, int bits) : camera(0, 0) {
+Window::Window(wstring name, int width, int height, bool fullscreen, int bits) : camera(0, 0) {
   hWnd = NULL;
   hInstance = GetModuleHandle(NULL);
   this->width = width;
@@ -378,14 +378,14 @@ Camera& Window::GetCamera() {
 /**
  * @return ширину окна
  */
-unsigned int Window::GetWidth() const {
+int Window::GetWidth() const {
 	return width;
 }
 
 /**
  * @return высоту окна
  */
-unsigned int Window::GetHeight() const {
+int Window::GetHeight() const {
 	return height;
 }
 

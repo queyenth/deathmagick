@@ -30,7 +30,7 @@ namespace se {
  * @param x : координата по X (по умолчанию 0)
  * @param y : координата по Y (по умолчанию 0)
  */
-Renderable::Renderable(unsigned int x, unsigned int y, unsigned int width, unsigned int height, Color color, bool isFixed) : x(x), y(y), width(width), height(height), angle(0), positionChanged(true),
+Renderable::Renderable(int x, int y, int width, int height, Color color, bool isFixed) : x(x), y(y), width(width), height(height), angle(0), positionChanged(true),
 isFlippedX(false), isFlippedY(false), isFixed(isFixed), color(color) {
   InitTextureRect();
 }
@@ -58,7 +58,7 @@ void Renderable::Move(int offsetX, int offsetY) {
  *
  * @param x : новая координата по X
  */
-void Renderable::SetX(unsigned int x) {
+void Renderable::SetX(int x) {
   this->x = x;
   positionChanged = true;
 }
@@ -68,7 +68,7 @@ void Renderable::SetX(unsigned int x) {
  *
  * @param y : новая координата по Y
  */
-void Renderable::SetY(unsigned int y) {
+void Renderable::SetY(int y) {
   this->y = y;
   positionChanged = true;
 }
@@ -78,7 +78,7 @@ void Renderable::SetY(unsigned int y) {
  *
  * @param width : новая ширина
  */
-void Renderable::SetWidth(unsigned int width) {
+void Renderable::SetWidth(int width) {
   this->width = width;
 }
 
@@ -87,7 +87,7 @@ void Renderable::SetWidth(unsigned int width) {
  *
  * @param height : новая высота
  */
-void Renderable::SetHeight(unsigned int height) {
+void Renderable::SetHeight(int height) {
   this->height = height;
 }
 
@@ -107,28 +107,28 @@ void Renderable::SetFixedMode(bool isFixed) {
 /**
  * @return координату X
  */
-unsigned int Renderable::GetX() const {
+int Renderable::GetX() const {
   return x;
 }
 
 /**
  * @return координату Y
  */
-unsigned int Renderable::GetY() const {
+int Renderable::GetY() const {
   return y;
 }
 
 /**
  * @return ширину объекта
  */
-unsigned int Renderable::GetWidth() const {
+int Renderable::GetWidth() const {
   return width;
 }
 
 /**
  * @return высоту объекта
  */
-unsigned int Renderable::GetHeight() const {
+int Renderable::GetHeight() const {
   return height;
 }
 

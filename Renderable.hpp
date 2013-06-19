@@ -38,7 +38,7 @@ public:
    * @param x : координата по X (по умолчанию 0)
    * @param y : координата по Y (по умолчанию 0)
    */
-  Renderable(unsigned int x=0, unsigned int y=0, unsigned int width=0, unsigned int height=0, Color color = Color(), bool isFixed=false);
+  Renderable(int x=0, int y=0, int width=0, int height=0, Color color = Color(), bool isFixed=false);
 
   /**
    * @brief Виртуальный деструктор
@@ -57,22 +57,22 @@ public:
   /**
    * @return координату X
    */
-  unsigned int GetX() const;
+  int GetX() const;
 
   /**
    * @return координату Y
    */
-  unsigned int GetY() const;
+  int GetY() const;
 
   /**
    * @return ширину объекта
    */
-  unsigned int GetWidth() const;
+  int GetWidth() const;
 
   /**
    * @return высоту объекта
    */
-  unsigned int GetHeight() const;
+  int GetHeight() const;
 
   /**
    * @return цвет объекта
@@ -89,14 +89,14 @@ public:
    *
    * @param x : новая координата по X
    */
-  void SetX(unsigned int x);
+  void SetX(int x);
 
   /**
    * @brief Изменяет координату по Y
    *
    * @param y : новая координата по Y
    */
-  void SetY(unsigned int y);
+  void SetY(int y);
 
   /**
    * @brief Изменяет цвет объекта
@@ -110,14 +110,14 @@ public:
    *
    * @param width : новая ширина
    */
-  void SetWidth(unsigned int width);
+  void SetWidth(int width);
 
   /**
    * @brief Изменяет высоту объекта
    *
    * @param height : новая высота
    */
-  void SetHeight(unsigned int height);
+  void SetHeight(int height);
 
   void SetFixedMode(bool isFixed);
 
@@ -171,10 +171,10 @@ protected:
   Rect textureRect;
 
   /// X координата
-  unsigned int x;
+  int x;
 
   /// Y координата
-  unsigned int y;
+  int y;
 
 private:
   /**
@@ -190,10 +190,10 @@ private:
   void InitTextureRect();
 
   /// Ширина объекта
-  unsigned int width;
+  int width;
 
   /// Высота объекта
-  unsigned int height;
+  int height;
 
   /// Цвет объекта
   Color color;

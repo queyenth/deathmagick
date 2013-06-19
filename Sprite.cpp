@@ -26,7 +26,7 @@ namespace se {
  * @param x : координата по X(по умолчанию 0)
  * @param y : координата по Y(по умолчанию 0)
  */
-Sprite::Sprite(unsigned int x, unsigned int y, unsigned int width, unsigned int height, Color color, bool isFixed) : Renderable(x, y, width, height, color, isFixed), image() {
+Sprite::Sprite(int x, int y, int width, int height, Color color, bool isFixed) : Renderable(x, y, width, height, color, isFixed), image() {
   
 }
 

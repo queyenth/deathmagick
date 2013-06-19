@@ -46,7 +46,7 @@ public:
    * @param height : высота окна (по умолчанию 480)
    * @param bits : глубина окна (по умолчанию 640)
    */
-  Window(wstring name, unsigned int width=640, unsigned int height=480, bool fullscreen=false, int bits=32);
+  Window(wstring name, int width=640, int height=480, bool fullscreen=false, int bits=32);
 
   /**
    * @brief Метод, который создает окно, и устанавливает на него фокус
@@ -104,12 +104,12 @@ public:
   /**
    * @return ширину окна
    */
-  unsigned int GetWidth() const;
+  int GetWidth() const;
 
   /**
    * @return высоту окна
    */
-  unsigned int GetHeight() const;
+  int GetHeight() const;
 
   /**
    * @return имя окна
@@ -159,10 +159,10 @@ private:
   HINSTANCE hInstance;
 
   /// ширина окна
-  unsigned int width;
+  int width;
 
   /// высота окна
-  unsigned int height;
+  int height;
 
   int bits;
 
