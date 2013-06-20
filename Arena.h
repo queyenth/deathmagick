@@ -2,7 +2,7 @@
 
 #include "GlobalObject.h"
 #include "Line.h"
-#include "Meteor.h"
+#include "SkillFactory.h"
 
 #include <algorithm>
 
@@ -10,22 +10,19 @@ enum Destination { LEFT, RIGHT };
 
 int backgroundScroll1;
 int backgroundScroll2;
+Destination destination;
 se::Image playerImg;
-Player player;
-vector<Player> enemies;
 se::Sprite spheres[3];
 bool k1p, k2p, k3p;
 bool castingSkill = false;
 KeySphere currentSphere;
-std::vector<PhysicsObject *> floors;
 se::Sprite stair(880, window.GetHeight()/4);
 se::Image stairImage;
 se::Sprite health(0, window.GetHeight()-10, player.GetHealth(), 10, se::Color(0.8f, 0.2f, 0.2f), true);
 int stairHeight;
-std::vector<DrawSomeTime> damageString;
 se::Sprite backgrounds[2];
 se::Image backgroundImage;
-int destination = RIGHT;
+std::vector<std::shared_ptr<Skill>> skillsOnFrame;
 bool moved = false;
 
 void InitEnemies() {
@@ -82,14 +79,12 @@ void InitSpheres() {
   k1p = k2p = k3p = false;
 }
 
-void InitSkills() {
-  // Meteor
-  skills.first = KeySphere(2, 1, 0);
-  skills.second = new Meteor();
-}
-
-void DeinitSkills() {
-  delete skills.second;
+void InitImprs() {
+  FILE *file = fopen("test.txt", "r");
+  int k1,k2,k3;
+  fscanf(file, "%d %d %d", &k1, &k2, &k3);
+  fclose(file);
+  imprs.push_back(tagIMPR(k1, k2, k3));
 }
 
 void InitArena() {
@@ -100,13 +95,12 @@ void InitArena() {
   InitPlayer();
   InitEnemies();
   InitSpheres();
-  InitSkills();
+  InitImprs();
 }
 
 void DeinitArena() {
   enemies.clear();
   damageString.clear();
-  DeinitSkills();
   for (auto i = floors.begin(); i != floors.end(); i++)
     delete *i;
 }
@@ -211,12 +205,10 @@ void DrawArena() {
   player.Tick(floors);
   health.SetWidth(player.GetHealth()*2);
 
-  // TODO : Erase all dead enemies from vector [amazing stuff, but I think that it costs a lot of time]
-  // TODO : Will check it later.
-
   int countOfDied = 0;
   enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&countOfDied](Player t) -> bool { if (!t.IsAlive()) countOfDied++; return !t.IsAlive(); }), enemies.end());
   damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
+  skillsOnFrame.erase(std::remove_if(skillsOnFrame.begin(), skillsOnFrame.end(), [](std::shared_ptr<Skill> t) { return !t->casting; }), skillsOnFrame.end());
   player.experience += countOfDied*12;
   
   for (auto i = enemies.begin(); i != enemies.end(); i++) {
@@ -265,28 +257,16 @@ void DrawArena() {
 
   // Drawing skill
   if (castingSkill) {
-    if (skills.first == currentSphere) {
-      skills.second->Cast(player);
-    }
+    skillsOnFrame.push_back(SkillFactory::MakeSkill(currentSphere, imprs[0]));
+    skillsOnFrame[skillsOnFrame.size()-1]->Cast(player);
     currentSphere.Clear();
     castingSkill = false;
   }
 
   // If skill casting draw skill, and check on collision
-  if (skills.second->casting) {
-    skills.second->Tick(window, floors);
-    if (!skills.second->casting) {
-      int left = skills.second->GetX() - skills.second->GetRange();
-      if (left <= 0) left = 0;
-      int right = skills.second->GetX() + skills.second->GetWidth() + skills.second->GetRange();
-      for (auto it = enemies.begin(); it != enemies.end(); it++) {
-        if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
-          wchar_t text[5];
-          wsprintf(text, L"%d", skills.second->GetDamage());
-          damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
-          it->DamageHim(skills.second->GetDamage());
-        }
-      }
+  for (auto i = skillsOnFrame.begin(); i != skillsOnFrame.end(); i++) {
+    if ((*i)->casting) {
+      (*i)->operation();
     }
   }
 

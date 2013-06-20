@@ -41,6 +41,7 @@ int main() {
       //DrawPause();
       break;
     case GAME_MENU:
+      ShowCursor(TRUE);
       DrawGameMenu();
       break;
     case SKILLS:

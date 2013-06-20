@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GlobalObject.h"
-
 #include "Button.h"
 
 se::Image playImage,arenaImage,quitImage,backimage;

@@ -4,15 +4,20 @@
 #include "Font.h"
 #include "DrawSomeTime.h"
 #include "KeySphere.h"
-#include "Skill.h"
+#include "Player.h"
+#include "Impr.h"
 
 se::Window window(L"Untitled Game", 640, 480, false);
 const se::Input &input = window.GetInput();
 se::Camera &camera = window.GetCamera();
 se::Font *font;
-std::pair<KeySphere, Skill *> skills;
+std::vector<tagIMPR> imprs;
 se::Sprite backMenu = se::Sprite(0, 0, window.GetWidth(), window.GetHeight());
 se::Image sphereImages[3];
+std::vector<PhysicsObject *> floors;
+Player player;
+vector<Player> enemies;
+std::vector<DrawSomeTime> damageString;
 
 enum GameState { MENU_INIT, MENU, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT };
 

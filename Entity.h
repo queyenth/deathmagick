@@ -2,6 +2,8 @@
 
 #include "PhysicsObject.h"
 
+#include <vector>
+
 class Entity : public PhysicsObject {
 public:
   enum { G = 2 };

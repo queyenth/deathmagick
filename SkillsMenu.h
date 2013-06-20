@@ -17,7 +17,7 @@ se::String name;
 se::Sprite skillSprite;
 se::Sprite spheresForMenu[3][3];
 
-static bool isInitedSkillsMenu = false;
+bool isInitedSkillsMenu = false;
 
 void InitSkillsMenu() {
   baseImage.LoadFromFile("img\\SkillBack.png");
@@ -51,9 +51,10 @@ void DrawSkills() {
     return ;
   }
   
-  Skill *skill = skills.second;
+  Skill *skill;
   switch (currentSkill) {
   case 0:
+    skill = SkillFactory::MakeSkill(KeySphere(2, 1, 0), imprs[currentSkill]).get();
     name.SetText(L"Meteorit");
     if (!skillImage.IsValid()) {
       skillImage.LoadFromFile("img\\meteor.png");
@@ -62,11 +63,11 @@ void DrawSkills() {
       skillSprite.SetHeight(128);
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-          if (skill->impr.k1 <= j && i == 0)
+          if (imprs[currentSkill].k1 <= j && i == 0)
             spheresForMenu[0][j].SetColor(se::Color(0.1f, 0.1f, 0.1f, 1.0f));
-          if (skill->impr.k2 <= j && i == 1)
+          if (imprs[currentSkill].k2 <= j && i == 1)
             spheresForMenu[1][j].SetColor(se::Color(0.1f, 0.1f, 0.1f, 1.0f));
-          if (skill->impr.k3 <= j && i == 2)
+          if (imprs[currentSkill].k3 <= j && i == 2)
             spheresForMenu[2][j].SetColor(se::Color(0.1f, 0.1f, 0.1f, 1.0f));
         }
       }
