@@ -43,6 +43,7 @@ int main() {
     case GAME_MENU:
       ShowCursor(TRUE);
       DrawGameMenu();
+      InitSkillsMenu();
       break;
     case SKILLS:
       DrawSkills();

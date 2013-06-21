@@ -17,8 +17,6 @@ se::String name;
 se::Sprite skillSprite;
 se::Sprite spheresForMenu[3][3];
 
-bool isInitedSkillsMenu = false;
-
 void InitSkillsMenu() {
   baseImage.LoadFromFile("img\\SkillBack.png");
   baseSprite.SetX(window.GetWidth()/2-100);
@@ -40,12 +38,9 @@ void InitSkillsMenu() {
     }
   }
   currentSkill = 0;
-  isInitedSkillsMenu = true;
 }
 
 void DrawSkills() {
-  if (!isInitedSkillsMenu) InitSkillsMenu();
-
   if (input.IsKeyPressed(VK_ESCAPE)) {
     currentState = GAME_MENU;
     return ;
