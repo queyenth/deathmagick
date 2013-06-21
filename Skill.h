@@ -11,7 +11,7 @@ public:
   virtual ~Skill() {}
 
   virtual void Cast(Player &) = 0;
-  virtual void operation() = 0;
+  virtual bool operation() = 0;
   
   virtual int GetDamage() {
     return damage;
@@ -22,7 +22,6 @@ public:
   }
 
   bool casting;
-protected:
   int damage;
   int range;
   Destination destination;

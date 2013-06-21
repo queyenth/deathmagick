@@ -4,7 +4,7 @@
 
 class Meteor : public Skill {
 public:
-  Meteor() : Skill(0, 0, 50, 100) {
+  Meteor() : Skill(0, 0, 50, 100), speed(5) {
     imageLoaded = false;
   }
 
@@ -23,9 +23,12 @@ public:
     SetX(player.GetX() + (destination == RIGHT ? 10 : -10));
     SetY(player.GetY() + 200);
     casting = true;
+    isDrawing = true;
     FlipX(player.IsFlippedX());
     destination = IsFlippedX() ? LEFT : RIGHT;
   }
 
   bool imageLoaded;
+  int speed;
+  bool isDrawing;
 };

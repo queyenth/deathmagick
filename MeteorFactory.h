@@ -1,17 +1,15 @@
 #pragma once
 
-#include "GlobalObject.h"
-
 #include "Meteor.h"
 
 class BaseMeteor : public Meteor {
 public:
-  virtual void operation() override {
+  BaseMeteor() : Meteor() {}
+  virtual bool operation() override {
+    if (!isDrawing) return false;
     for (auto i = floors.begin(); i != floors.end(); i++) {
       if ((*i)->CheckCollision(this)) {
-        casting = false;
         int left = GetX() - GetRange();
-        if (left <= 0) left = 0;
         int right = GetX() + GetWidth() + GetRange();
         for (auto it = enemies.begin(); it != enemies.end(); it++) {
           if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
@@ -21,91 +19,242 @@ public:
             it->DamageHim(GetDamage());
           }
         }
+        isDrawing = false;
+        break;
       }
     }
     window.Draw(this);
     switch (destination) {
     case LEFT:
-      Move(-5, -5);
+      Move(-speed, -speed);
       break;
     case RIGHT:
-      Move(5,-5);
+      Move(speed, -speed);
       break;
     default:
       break;
     }
+    return isDrawing;
   }
 };
 
 class OneFireMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
 public:
-  OneFireMeteor() { damage = 50; }
-  virtual void operation() override {
-    static bool falling = false;
-    static int movedDistance = 0;
-    if (falling) {
-      if (movedDistance > 300) {
-        casting = false;
-        falling = false;
-        movedDistance = 0;
-      }
-      else {
-        window.Draw(this);
-        if (destination == LEFT)
-          Move(-5, 0);
-        else
-          Move(5, 0);
-        movedDistance += 5;
-        for (auto it = enemies.begin(); it != enemies.end(); it++) {
-          if (it->CheckCollision(this) && it->damageTime == 0) {
-            wchar_t text[5];
-            wsprintf(text, L"%d", GetDamage());
-            damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
-            it->DamageHim(GetDamage());
-          }
-        }
-      }
-      return ;
-    }
-    for (auto i = floors.begin(); i != floors.end(); i++) {
-      if ((*i)->CheckCollision(this)) {
-        falling = true;
-        int left = GetX() - GetRange();
-        if (left <= 0) left = 0;
-        int right = GetX() + GetWidth() + GetRange();
-        for (auto it = enemies.begin(); it != enemies.end(); it++) {
-          if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
-            wchar_t text[5];
-            wsprintf(text, L"%d", GetDamage());
-            damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
-            it->DamageHim(GetDamage());
-          }
-        }
-      }
-    }
-    window.Draw(this);
-    switch (destination) {
-    case LEFT:
-      Move(-5, -5);
-      break;
-    case RIGHT:
-      Move(5,-5);
-      break;
-    default:
-      break;
-    }
+  OneFireMeteor() : Meteor() {movedDistance = 0; FireTime = false;}
+  OneFireMeteor(Meteor *meteor) : Meteor(), base(meteor) { movedDistance = 0; FireTime = false; }
+  
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
   }
+
+  virtual bool operation() override {
+    if (!FireTime) {
+      if (base->operation())
+        return true;
+      FireTime = true;
+    }
+    if (movedDistance > 300) {
+      movedDistance = 0;
+      return false;
+    }
+    window.Draw(base.get());
+    if (base->destination == LEFT)
+      base->Move(-base->speed, 0);
+    else
+      base->Move(base->speed, 0);
+    movedDistance += base->speed;
+    for (auto it = enemies.begin(); it != enemies.end(); it++) {
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
+        wchar_t text[5];
+        wsprintf(text, L"%d", GetDamage());
+        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+        it->DamageHim(GetDamage());
+      }
+    }
+    return true;
+  }
+
+  int movedDistance;
+  bool FireTime;
+};
+
+class OneIceMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  OneIceMeteor() : Meteor() {}
+  OneIceMeteor(Meteor *meteor) : Meteor(), base(meteor) {}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    if (base->operation())
+      return true;
+    window.Draw(base.get());
+    int left = GetX() - GetRange();
+    int right = base->GetX() + base->GetWidth() + base->GetRange();
+    for (auto it = enemies.begin(); it != enemies.end(); it++) {
+      if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
+        it->Freeze(2000);
+      }
+    }
+    return false;
+  }
+};
+
+class OneFireAndOneIceMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  OneFireAndOneIceMeteor(Meteor *meteor) : base(meteor) {FireTime = false; movedDistance = 0;}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    if (!FireTime) {
+      if (base->operation())
+        return true;
+      Ice();
+      FireTime = true;
+    }
+    return Fire();
+  }
+
+  bool Ice() {
+    window.Draw(base.get());
+    int left = GetX() - GetRange();
+    int right = base->GetX() + base->GetWidth() + base->GetRange();
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
+        it->Freeze(2000);
+    return false;
+  }
+
+  bool Fire() {
+    if (movedDistance > 300) {
+      movedDistance = 0;
+      return false;
+    }
+    window.Draw(base.get());
+    if (base->destination == LEFT)
+      base->Move(-base->speed, 0);
+    else
+      base->Move(base->speed, 0);
+    movedDistance += base->speed;
+    for (auto it = enemies.begin(); it != enemies.end(); it++) {
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
+        wchar_t text[5];
+        wsprintf(text, L"%d", GetDamage());
+        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+        it->DamageHim(GetDamage());
+      }
+    }
+    return true;
+  }
+
+  bool FireTime;
+  int movedDistance;
+};
+
+class OneLightMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  OneLightMeteor(Meteor *meteor) : base(meteor) {}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    base->speed = 8;
+    if (base->operation())
+      return true;
+    window.Draw(base.get());
+    int left = GetX() - GetRange();
+    int right = base->GetX() + base->GetWidth() + base->GetRange();
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
+        it->Stun(1000);
+    return false;
+  }
+
+};
+
+class OneFireAndOneLightMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  OneFireAndOneLightMeteor(Meteor *meteor) : base(meteor) {FireTime = false; movedDistance = 0;}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    base->speed = 8;
+    if (!FireTime) {
+      if (base->operation())
+        return true;
+      Light();
+      FireTime = true;
+    }
+    return Fire();
+  }
+
+  bool Light() {
+    window.Draw(base.get());
+    int left = GetX() - GetRange();
+    int right = base->GetX() + base->GetWidth() + base->GetRange();
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
+        it->Stun(2000);
+    return false;
+  }
+
+  bool Fire() {
+    if (movedDistance > 300) {
+      movedDistance = 0;
+      return false;
+    }
+    window.Draw(base.get());
+    if (base->destination == LEFT)
+      base->Move(-base->speed, 0);
+    else
+      base->Move(base->speed, 0);
+    movedDistance += base->speed;
+    for (auto it = enemies.begin(); it != enemies.end(); it++) {
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
+        wchar_t text[5];
+        wsprintf(text, L"%d", GetDamage());
+        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+        it->DamageHim(GetDamage());
+      }
+    }
+    return true;
+  }
+
+  bool FireTime;
+  int movedDistance;
 };
 
 class MeteorFactory {
 public:
   MeteorFactory() {}
-  ~MeteorFactory() {}
 
   static std::shared_ptr<Meteor> MakeMeteor(tagIMPR impr) {
-    if (impr.k1 == 0 && impr.k2 == 0 && impr.k3 == 0)
+    if (impr.k1 == 1 && impr.k2 == 0 && impr.k3 == 0)
+      return std::shared_ptr<Meteor>(new OneFireMeteor(new BaseMeteor()));
+    else if (impr.k1 == 0 && impr.k2 == 1 && impr.k3 == 0)
+      return std::shared_ptr<Meteor>(new OneIceMeteor(new BaseMeteor()));
+    else if (impr.k1 == 1 && impr.k2 == 1 && impr.k3 == 0)
+      return std::shared_ptr<Meteor>(new OneFireAndOneIceMeteor(new BaseMeteor()));
+    else if (impr.k1 == 0 && impr.k2 == 0 && impr.k3 == 1)
+      return std::shared_ptr<Meteor>(new OneLightMeteor(new BaseMeteor()));
+    else if (impr.k1 == 1 && impr.k2 == 0 && impr.k3 == 1)
+      return std::shared_ptr<Meteor>(new OneFireAndOneLightMeteor(new BaseMeteor()));
+    else
       return std::shared_ptr<Meteor>(new BaseMeteor());
-    else if (impr.k1 == 1 && impr.k2 == 0 && impr.k3 == 0)
-      return std::shared_ptr<Meteor>(new OneFireMeteor());
   }
 };
