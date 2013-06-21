@@ -5,6 +5,7 @@
 #include "DrawSomeTime.h"
 #include "KeySphere.h"
 #include "Player.h"
+#include "Enemy.h"
 #include "Impr.h"
 
 se::Window window(L"Untitled Game", 640, 480, false);
@@ -16,7 +17,7 @@ se::Sprite backMenu = se::Sprite(0, 0, window.GetWidth(), window.GetHeight());
 se::Image sphereImages[3];
 std::vector<PhysicsObject *> floors;
 Player player;
-vector<Player> enemies;
+vector<Enemy> enemies;
 std::vector<DrawSomeTime> damageString;
 
 enum GameState { MENU_INIT, MENU, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT };

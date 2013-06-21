@@ -28,7 +28,7 @@ bool moved = false;
 void InitEnemies() {
   playerImg.LoadFromFile("img\\player.png");
   for (int i = 0; i < 10; i++) {
-    Player enemy;
+    Enemy enemy;
     enemy.SetX((i+1)*300);
     enemy.SetImage(playerImg);
     enemy.SetY(window.GetHeight()/2);
@@ -43,6 +43,7 @@ void InitPlayer() {
   player.SetY(window.GetHeight()/3);
   player.health = 100;
   player.experience = 0;
+  player.speed = 3;
 }
 
 void InitStairs() {
@@ -143,13 +144,13 @@ void DrawArena() {
       player.Jump();
   }
   if (input.IsKeyPressed('A')) {
-    player.TryToMove(-3, 0, floors);
+    player.TryToMove(-1, 0, floors);
     destination = LEFT;
     moved = true;
     player.FlipX(true);
   }
   if (input.IsKeyPressed('D')) {
-    player.TryToMove(3, 0, floors);
+    player.TryToMove(1, 0, floors);
     destination = RIGHT;
     moved = true;
     player.FlipX(false);
@@ -206,18 +207,14 @@ void DrawArena() {
   health.SetWidth(player.GetHealth()*2);
 
   int countOfDied = 0;
-  enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&countOfDied](Player t) -> bool { if (!t.IsAlive()) countOfDied++; return !t.IsAlive(); }), enemies.end());
+  enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&countOfDied](Enemy t) -> bool { if (!t.IsAlive()) countOfDied++; return !t.IsAlive(); }), enemies.end());
   damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
   skillsOnFrame.erase(std::remove_if(skillsOnFrame.begin(), skillsOnFrame.end(), [](std::shared_ptr<Skill> t) { return !t->casting; }), skillsOnFrame.end());
   player.experience += countOfDied*12;
   
   for (auto i = enemies.begin(); i != enemies.end(); i++) {
-    //i->AITick(floors);
-    i->Tick(floors);
-    if (GetTickCount() - i->damageTime > 2000 && i->damageTime != 0) {
-      i->damageTime = 0;
-      i->SetColor(se::Color());
-    }
+    i->AITick(floors);
+    //i->Tick(floors);
   }
 
   window.Clear(se::Color(0.0f, 0.0f, 0.0f));
@@ -264,11 +261,8 @@ void DrawArena() {
   }
 
   // If skill casting draw skill, and check on collision
-  for (auto i = skillsOnFrame.begin(); i != skillsOnFrame.end(); i++) {
-    if ((*i)->casting) {
-      (*i)->operation();
-    }
-  }
+  for (auto i = skillsOnFrame.begin(); i != skillsOnFrame.end(); i++)
+    (*i)->casting = (*i)->operation();
 
   for (auto i = damageString.begin(); i != damageString.end(); i++)
     if (i->entity != nullptr)
