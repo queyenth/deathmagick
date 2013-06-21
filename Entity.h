@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PhysicsObject.h"
+#include "EntityEffect.h"
 
 #include <vector>
 
@@ -11,13 +12,18 @@ public:
   Entity(int x = 0, int y = 0, int maxJump = 30);
   virtual ~Entity() { }
   
-  void TryToMove(int offsetX, int offsetY, std::vector<PhysicsObject *> floors);
-  void Tick(std::vector<PhysicsObject *> things);
+  virtual void TryToMove(int offsetX, int offsetY, std::vector<PhysicsObject *> floors);
+  virtual void Tick(std::vector<PhysicsObject *> things);
 
   bool CheckCollision(PhysicsObject *other) override;
 
   State inAir;
+  Effect freeze;
+  Effect damage;
+  Effect stun;
+  int speed;
 protected:
   int maxJump;
   int currentJump;
 };
+

@@ -14,6 +14,13 @@ public:
     currentJump = maxJump;
   }
 
+  virtual void Tick(std::vector<PhysicsObject *> things) override {
+    damage.CheckEffect();
+    freeze.CheckEffect();
+    stun.CheckEffect();
+    Entity::Tick(things);
+  }
+
   void DamageHim(int damage) {
 	  if (health - damage <= 0)
       health = 0;
@@ -29,28 +36,6 @@ public:
 
   int GetHealth() const {
     return health;
-  }
-
-  void DrawHealth(se::Window &window) const {
-    int width = GetHealth() * GetWidth()/100;
-    se::Sprite health(GetX(), GetY()+GetHeight()+5, width, 5, se::Color(0.8f, 0.2f, 0.2f), false);
-    window.Draw(&health);
-  }
-
-  // We need make AI FUCKING AWESOME
-  void AITick(std::vector<PhysicsObject *> floors) {
-    static DWORD startTime = GetTickCount();
-    static int dest = 1;
-    if (GetTickCount() - startTime <= 2000) {
-      TryToMove(dest*2, 0, floors);
-    }
-    else {
-      dest = rand()%2;
-      if (dest == 0) { dest = -1; this->FlipX(true); }
-      else this->FlipX(false);
-      startTime = GetTickCount();
-    }
-    Tick(floors);
   }
 
   unsigned int experience;

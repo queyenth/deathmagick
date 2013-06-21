@@ -1,20 +1,26 @@
 #include "Entity.h"
 
-Entity::Entity(int x, int y, int maxJump) : PhysicsObject(x, y), inAir(STADING), maxJump(maxJump), currentJump(0) {}
+Entity::Entity(int x, int y, int maxJump) : PhysicsObject(x, y), inAir(STADING), maxJump(maxJump), currentJump(0), speed(3),
+  damage(se::Color(1.0f, 0.4f, 0.4f, 1.0f)),
+  stun(se::Color(0.6f, 0.6f, 0.6f, 1.0f)), freeze(se::Color(0.4f, 0.4f, 1.0f, 0.5f)) {}
 
 void Entity::TryToMove(int offsetX, int offsetY, std::vector<PhysicsObject *> floors) {
-  this->Move(offsetX, offsetY);
-  bool canMove = true;
-  for (auto i = floors.begin(); i != floors.end(); i++)
-    if (CheckCollision(*i)) {
+  if (!stun.UnderEffect()) {
+    int speedX = !freeze.UnderEffect() ? speed*offsetX : speed*offsetX/2;
+    int speedY = !freeze.UnderEffect() ? speed*offsetY : speed*offsetY/2;
+    this->Move(speedX, speedY);
+    bool canMove = true;
+    for (auto i = floors.begin(); i != floors.end(); i++)
+      if (CheckCollision(*i)) {
+        canMove = false;
+        break;
+      }
+    int lolka = x + speedX;
+    if (lolka <= 2)
       canMove = false;
-      break;
-    }
-  int lolka = x + offsetX;
-  if (lolka <= 2)
-    canMove = false;
-  if (!canMove)
-    this->Move(-offsetX, -offsetY);
+    if (!canMove)
+      this->Move(-speedX, -speedY);
+  }
 }
 
 void Entity::Tick(std::vector<PhysicsObject *> things) {
