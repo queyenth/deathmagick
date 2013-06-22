@@ -341,12 +341,12 @@ public:
     if (!iceFromLandImage.IsValid()) {
       iceFromLandImage.LoadFromFile("img\\ice_from_lang.png");
       iceFromLand.SetImage(iceFromLandImage);
-      iceFromLand.SetY(base->GetY() - 42);
+      iceFromLand.SetY(base->GetY() - 21);
     }
-    iceFromLand.Move(0, 21);
+    iceFromLand.Move(0, 1);
     int left = base->GetX() - GetRange();
     int right = base->GetX() + base->GetWidth() + GetRange();
-    if (countOfFrames == 2) {
+    if (countOfFrames == 21) {
       for (auto it = enemies.begin(); it != enemies.end(); it++)
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
           it->DamageHim(25);
