@@ -263,6 +263,58 @@ public:
   }
 };
 
+class OneFireAndOneIceAndOneLightMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  OneFireAndOneIceAndOneLightMeteor(Meteor *meteor) : base(meteor) {FireTime = false; movedDistance = 0;}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    if (!FireTime) {
+      if (base->operation())
+        return true;
+      window.Draw(base.get());
+      int left = base->GetX() - base->GetRange();
+      int right = base->GetX() + base->GetWidth() + base->GetRange();
+      for (auto it = enemies.begin(); it != enemies.end(); it++)
+        if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
+          it->Freeze(2000);
+          it->Stun(2000);
+        }
+      FireTime = true;
+    }
+    return Fire();
+  }
+
+  bool Fire() {
+    if (movedDistance > 300) {
+      movedDistance = 0;
+      return false;
+    }
+    window.Draw(base.get());
+    if (base->destination == LEFT)
+      base->Move(-base->speed, 0);
+    else
+      base->Move(base->speed, 0);
+    movedDistance += base->speed;
+    for (auto it = enemies.begin(); it != enemies.end(); it++) {
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
+        wchar_t text[5];
+        wsprintf(text, L"%d", GetDamage());
+        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+        it->DamageHim(GetDamage());
+      }
+    }
+    return true;
+  }
+
+  bool FireTime;
+  int movedDistance;
+};
+
 class MeteorFactory {
 public:
   MeteorFactory() {}
@@ -280,6 +332,8 @@ public:
       return std::shared_ptr<Meteor>(new OneFireAndOneLightMeteor(new BaseMeteor()));
     else if (impr.k1 == 0 && impr.k2 == 1 && impr.k3 == 1)
       return std::shared_ptr<Meteor>(new OneIceAndOneLightMeteor(new BaseMeteor()));
+    else if (impr.k1 == 1 && impr.k2 == 1 && impr.k3 == 1)
+      return std::shared_ptr<Meteor>(new OneFireAndOneIceAndOneLightMeteor(new BaseMeteor()));
     else
       return std::shared_ptr<Meteor>(new BaseMeteor());
   }
