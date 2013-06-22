@@ -366,6 +366,50 @@ public:
   bool falling;
 };
 
+class TwoLightMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  TwoLightMeteor(Meteor *meteor) : base(meteor) {}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    static int countOfMeteors = 0;
+    static DWORD lastMeteor;
+    static bool waitingNew = false;
+    if (waitingNew) {
+      if (GetTickCount() - lastMeteor > 500) {
+        base->Cast(player);
+        countOfMeteors++;
+        waitingNew = false;
+      }
+      return true;
+    }
+    if (countOfMeteors != 3) {
+      base->speed = 8;
+      if (base->operation()) {
+        return true;
+      }
+      else
+        waitingNew = true;
+      window.Draw(base.get());
+      int left = GetX() - GetRange();
+      int right = base->GetX() + base->GetWidth() + base->GetRange();
+      for (auto it = enemies.begin(); it != enemies.end(); it++)
+        if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
+          it->Stun(1000);
+      lastMeteor = GetTickCount();
+      return true;
+    }
+    countOfMeteors = 0;
+    waitingNew = false;
+    return false;
+  }
+
+};
+
 class MeteorFactory {
 public:
   MeteorFactory() {}
@@ -387,6 +431,8 @@ public:
       return std::shared_ptr<Meteor>(new OneFireAndOneIceAndOneLightMeteor(new BaseMeteor()));
     else if (impr.k1 == 0 && impr.k2 == 2 && impr.k3 == 0)
       return std::shared_ptr<Meteor>(new TwoIceMeteor(new BaseMeteor()));
+    else if (impr.k1 == 0 && impr.k2 == 0 && impr.k3 == 2)
+      return std::shared_ptr<Meteor>(new TwoLightMeteor(new BaseMeteor()));
     else
       return std::shared_ptr<Meteor>(new BaseMeteor());
   }
