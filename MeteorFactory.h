@@ -239,6 +239,30 @@ public:
   int movedDistance;
 };
 
+class OneIceAndOneLightMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  OneIceAndOneLightMeteor(Meteor *meteor) : base(meteor) {}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    if (base->operation())
+      return true;
+    window.Draw(base.get());
+    int left = base->GetX() - base->GetRange();
+    int right = base->GetX() + base->GetWidth() + base->GetRange();
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
+        it->Freeze(2000);
+        it->Stun(2000);
+      }
+    return false;
+  }
+};
+
 class MeteorFactory {
 public:
   MeteorFactory() {}
@@ -254,6 +278,8 @@ public:
       return std::shared_ptr<Meteor>(new OneLightMeteor(new BaseMeteor()));
     else if (impr.k1 == 1 && impr.k2 == 0 && impr.k3 == 1)
       return std::shared_ptr<Meteor>(new OneFireAndOneLightMeteor(new BaseMeteor()));
+    else if (impr.k1 == 0 && impr.k2 == 1 && impr.k3 == 1)
+      return std::shared_ptr<Meteor>(new OneIceAndOneLightMeteor(new BaseMeteor()));
     else
       return std::shared_ptr<Meteor>(new BaseMeteor());
   }
