@@ -15,14 +15,9 @@ public:
       if ((*i)->CheckCollision(this)) {
         int left = GetX() - GetRange();
         int right = GetX() + GetWidth() + GetRange();
-        for (auto it = enemies.begin(); it != enemies.end(); it++) {
-          if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
-            wchar_t text[5];
-            wsprintf(text, L"%d", GetDamage());
-            damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+        for (auto it = enemies.begin(); it != enemies.end(); it++)
+          if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
             it->DamageHim(GetDamage());
-          }
-        }
         isDrawing = false;
         break;
       }
@@ -71,14 +66,9 @@ public:
     else
       base->Move(base->speed, 0);
     movedDistance += base->speed;
-    for (auto it = enemies.begin(); it != enemies.end(); it++) {
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
-        wchar_t text[5];
-        wsprintf(text, L"%d", GetDamage());
-        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
         it->DamageHim(GetDamage());
-      }
-    }
     return true;
   }
 
@@ -151,14 +141,9 @@ public:
     else
       base->Move(base->speed, 0);
     movedDistance += base->speed;
-    for (auto it = enemies.begin(); it != enemies.end(); it++) {
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
-        wchar_t text[5];
-        wsprintf(text, L"%d", GetDamage());
-        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
         it->DamageHim(GetDamage());
-      }
-    }
     return true;
   }
 
@@ -231,14 +216,9 @@ public:
     else
       base->Move(base->speed, 0);
     movedDistance += base->speed;
-    for (auto it = enemies.begin(); it != enemies.end(); it++) {
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
-        wchar_t text[5];
-        wsprintf(text, L"%d", GetDamage());
-        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
         it->DamageHim(GetDamage());
-      }
-    }
     return true;
   }
 
@@ -307,14 +287,9 @@ public:
     else
       base->Move(base->speed, 0);
     movedDistance += base->speed;
-    for (auto it = enemies.begin(); it != enemies.end(); it++) {
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
-        wchar_t text[5];
-        wsprintf(text, L"%d", GetDamage());
-        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
         it->DamageHim(GetDamage());
-      }
-    }
     return true;
   }
 
@@ -475,14 +450,9 @@ public:
       else
         base->Move(base->speed, 0);
       movedDistance += base->speed;
-      for (auto it = enemies.begin(); it != enemies.end(); it++) {
-        if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
-          wchar_t text[5];
-          wsprintf(text, L"%d", GetDamage());
-          damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+      for (auto it = enemies.begin(); it != enemies.end(); it++)
+        if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
           it->DamageHim(GetDamage());
-        }
-      }
     }
     return true;
   }
@@ -615,14 +585,9 @@ public:
         else
           meteors[i].Move(meteors[i].speed, 0);
         movedDistance[i] += meteors[i].speed;
-        for (auto it = enemies.begin(); it != enemies.end(); it++) {
-          if (it->CheckCollision(&meteors[i]) && !it->damage.UnderEffect()) {
-            wchar_t text[5];
-            wsprintf(text, L"%d", GetDamage());
-            damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+        for (auto it = enemies.begin(); it != enemies.end(); it++)
+          if (it->CheckCollision(&meteors[i]) && !it->damage.UnderEffect())
             it->DamageHim(GetDamage());
-          }
-        }
       }
     }
     // Скилл заканчивается, когда все метеориты запущены, и все метеориты пролетели уже
@@ -704,21 +669,16 @@ public:
     if (base->GetX() - lastFire > fireSprite.GetWidth()) {
       lastFire = base->GetX();
       fireSprite.SetX(lastFire);
-      damageString.push_back(DrawSomeTime(std::shared_ptr<se::Sprite>(new se::Sprite(fireSprite)), 3000));
+      effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
     }
     if (base->destination == LEFT)
       base->Move(-base->speed, 0);
     else
       base->Move(base->speed, 0);
     movedDistance += base->speed;
-    for (auto it = enemies.begin(); it != enemies.end(); it++) {
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
-        wchar_t text[5];
-        wsprintf(text, L"%d", GetDamage());
-        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
         it->DamageHim(GetDamage());
-      }
-    }
     return true;
   }
 
@@ -726,7 +686,7 @@ public:
   int movedDistance;
 
   se::Image fireImage;
-  se::Sprite fireSprite;
+  Entity fireSprite;
   int lastFire;
 
 };
@@ -765,21 +725,16 @@ public:
     if (base->GetX() - lastFire > fireSprite.GetWidth()) {
       lastFire = base->GetX();
       fireSprite.SetX(lastFire);
-      damageString.push_back(DrawSomeTime(std::shared_ptr<se::Sprite>(new se::Sprite(fireSprite)), 3000));
+      effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
     }
     if (base->destination == LEFT)
       base->Move(-base->speed, 0);
     else
       base->Move(base->speed, 0);
     movedDistance += base->speed;
-    for (auto it = enemies.begin(); it != enemies.end(); it++) {
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
-        wchar_t text[5];
-        wsprintf(text, L"%d", GetDamage());
-        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
         it->DamageHim(GetDamage());
-      }
-    }
     return true;
   }
 
@@ -787,7 +742,7 @@ public:
   int movedDistance;
 
   se::Image fireImage;
-  se::Sprite fireSprite;
+  Entity fireSprite;
   int lastFire;
 };
 
@@ -824,21 +779,16 @@ public:
     if (base->GetX() - lastFire > fireSprite.GetWidth()) {
       lastFire = base->GetX();
       fireSprite.SetX(lastFire);
-      damageString.push_back(DrawSomeTime(std::shared_ptr<se::Sprite>(new se::Sprite(fireSprite)), 3000));
+      effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
     }
     if (base->destination == LEFT)
       base->Move(-base->speed, 0);
     else
       base->Move(base->speed, 0);
     movedDistance += base->speed;
-    for (auto it = enemies.begin(); it != enemies.end(); it++) {
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
-        wchar_t text[5];
-        wsprintf(text, L"%d", GetDamage());
-        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
         it->DamageHim(GetDamage());
-      }
-    }
     return true;
   }
 
@@ -846,7 +796,7 @@ public:
   int movedDistance;
 
   se::Image fireImage;
-  se::Sprite fireSprite;
+  Entity fireSprite;
   int lastFire;
 };
 
@@ -870,12 +820,9 @@ public:
         waveTimes = 0;
         int left = waveSprite.GetX();
         int right = waveSprite.GetX()+waveSprite.GetWidth();
-        for (auto it = enemies.begin(); it != enemies.end(); it++) {
-          if (left <= it->GetX() && it->GetX()+it->GetWidth() <= right) {
-            damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(L"200", font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+        for (auto it = enemies.begin(); it != enemies.end(); it++)
+          if (left <= it->GetX() && it->GetX()+it->GetWidth() <= right)
             it->DamageHim(200);
-          }
-        }
         return false;
       }
       waveSprite.SetWidth(50+waveTimes*8);
@@ -903,21 +850,16 @@ public:
     if (base->GetX() - lastFire > fireSprite.GetWidth()) {
       lastFire = base->GetX();
       fireSprite.SetX(lastFire);
-      damageString.push_back(DrawSomeTime(std::shared_ptr<se::Sprite>(new se::Sprite(fireSprite)), 3000));
+      effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
     }
     if (base->destination == LEFT)
       base->Move(-base->speed, 0);
     else
       base->Move(base->speed, 0);
     movedDistance += base->speed;
-    for (auto it = enemies.begin(); it != enemies.end(); it++) {
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
-        wchar_t text[5];
-        wsprintf(text, L"%d", GetDamage());
-        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
         it->DamageHim(GetDamage());
-      }
-    }
     return true;
   }
 
@@ -927,7 +869,7 @@ public:
   int waveTimes;
 
   se::Image fireImage;
-  se::Sprite fireSprite;
+  Entity fireSprite;
   se::Image waveImage;
   se::Sprite waveSprite;
   int lastFire;
@@ -961,14 +903,9 @@ public:
         if ((*i)->CheckCollision(meteor)) {
           int left = meteor->GetX() - meteor->GetRange();
           int right = meteor->GetX() +meteor-> GetWidth() + meteor->GetRange();
-          for (auto it = enemies.begin(); it != enemies.end(); it++) {
-            if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
-              wchar_t text[5];
-              wsprintf(text, L"%d", GetDamage());
-              damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+          for (auto it = enemies.begin(); it != enemies.end(); it++)
+            if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
               it->DamageHim(GetDamage());
-            }
-          }
           meteor->casting = false;
         }
       }

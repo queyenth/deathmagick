@@ -208,7 +208,8 @@ void DrawArena() {
 
   int countOfDied = 0;
   enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&countOfDied](Enemy t) -> bool { if (!t.IsAlive()) countOfDied++; return !t.IsAlive(); }), enemies.end());
-  damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
+  damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime<se::String> t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
+  effects.erase(std::remove_if(effects.begin(), effects.end(), [](DrawSomeTime<Entity> t) { return GetTickCount() - t.firstTime > t.time; }), effects.end());
   skillsOnFrame.erase(std::remove_if(skillsOnFrame.begin(), skillsOnFrame.end(), [](std::shared_ptr<Skill> t) { return !t->casting; }), skillsOnFrame.end());
   player.experience += countOfDied*12;
   
@@ -268,6 +269,15 @@ void DrawArena() {
     if (i->entity != nullptr)
       window.Draw(i->entity.get());
   
+  for (auto i = effects.begin(); i != effects.end(); i++)
+    if (i->entity != nullptr) {
+      for (auto j = enemies.begin(); j != enemies.end(); j++)
+        if (j->CheckCollision(i->entity.get()))
+          j->DamageHim(12);
+      window.Draw(i->entity.get());
+    }
+
+
   window.Display();
 
   // For 60 FPS
