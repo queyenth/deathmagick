@@ -724,6 +724,66 @@ public:
 
 };
 
+class TwoFireAndOneLightMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  TwoFireAndOneLightMeteor(Meteor *base) : base(base) {FireTime = false; movedDistance = 0; lastFire = 0;}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    base->speed = 8;
+    if (!FireTime) {
+      if (base->operation())
+        return true;
+      int left = GetX() - GetRange();
+      int right = base->GetX() + base->GetWidth() + base->GetRange();
+      for (auto it = enemies.begin(); it != enemies.end(); it++)
+        if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
+          it->Stun(1000);
+      FireTime = true;
+    }
+    if (!fireImage.IsValid()) {
+      fireImage.LoadFromFile("img\\fire.png");
+      fireSprite.SetImage(fireImage);
+      fireSprite.SetY(base->GetY());
+    }
+    if (movedDistance > 300) {
+      movedDistance = 0;
+      return false;
+    }
+    window.Draw(base.get());
+    if (base->GetX() - lastFire > fireSprite.GetWidth()) {
+      lastFire = base->GetX();
+      fireSprite.SetX(lastFire);
+      damageString.push_back(DrawSomeTime(std::shared_ptr<se::Sprite>(new se::Sprite(fireSprite)), 3000));
+    }
+    if (base->destination == LEFT)
+      base->Move(-base->speed, 0);
+    else
+      base->Move(base->speed, 0);
+    movedDistance += base->speed;
+    for (auto it = enemies.begin(); it != enemies.end(); it++) {
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
+        wchar_t text[5];
+        wsprintf(text, L"%d", GetDamage());
+        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+        it->DamageHim(GetDamage());
+      }
+    }
+    return true;
+  }
+
+  bool FireTime;
+  int movedDistance;
+
+  se::Image fireImage;
+  se::Sprite fireSprite;
+  int lastFire;
+};
+
 class MeteorFactory {
 public:
   MeteorFactory() {}
@@ -757,6 +817,8 @@ public:
       return std::shared_ptr<Meteor>(new TwoLightAndOneIceMeteor(new BaseMeteor()));
     else if (impr.k1 == 2 && impr.k2 == 0 && impr.k3 == 0)
       return std::shared_ptr<Meteor>(new TwoFireMeteor(new BaseMeteor()));
+    else if (impr.k1 == 2 && impr.k2 == 0 && impr.k3 == 1)
+      return std::shared_ptr<Meteor>(new TwoFireAndOneLightMeteor(new BaseMeteor()));
     else
       return std::shared_ptr<Meteor>(new BaseMeteor());
   }
