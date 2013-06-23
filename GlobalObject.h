@@ -16,6 +16,7 @@ std::vector<tagIMPR> imprs;
 se::Sprite backMenu = se::Sprite(0, 0, window.GetWidth(), window.GetHeight());
 se::Image sphereImages[3];
 std::vector<PhysicsObject *> floors;
+//std::vector<Entity> floors;
 Player player;
 vector<Enemy> enemies;
 std::vector<DrawSomeTime<se::String>> damageString;
