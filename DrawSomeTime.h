@@ -4,9 +4,10 @@
 
 #include <memory>
 
+template <typename value>
 class DrawSomeTime {
 public:
-  DrawSomeTime(std::shared_ptr<se::Renderable> entity, DWORD time) {
+  DrawSomeTime(std::shared_ptr<value> entity, DWORD time) {
     SetEntity(entity);
     this->time = time;
   }
@@ -20,12 +21,12 @@ public:
     
   }
 
-  void SetEntity(std::shared_ptr<se::Renderable> entity) {
+  void SetEntity(std::shared_ptr<value> entity) {
     this->entity = entity;
     firstTime = GetTickCount();
   }
 
-  std::shared_ptr<se::Renderable> entity;
+  std::shared_ptr<value> entity;
   DWORD time;
   DWORD firstTime;
 };

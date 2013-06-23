@@ -56,7 +56,9 @@ void Entity::Tick(std::vector<PhysicsObject *> things) {
     SetY(y - currentJump);
     for (auto i = things.begin(); i != things.end(); i++)
       if ((*i)->CheckCollision(this)) {
+        this->SetY((*i)->GetY()+(*i)->GetHeight());
         inAir = STADING;
+        break;
       }
     break;
   case ONSTAIR:
