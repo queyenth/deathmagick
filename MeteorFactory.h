@@ -2,9 +2,13 @@
 
 #include "Meteor.h"
 
+#define _USE_MATH_DEFINES 
+
+#include <cmath>
+
 class BaseMeteor : public Meteor {
 public:
-  BaseMeteor() : Meteor() {}
+  BaseMeteor() : Meteor() {speedX = speedY = speed;}
   virtual bool operation() override {
     if (!isDrawing) return false;
     for (auto i = floors.begin(); i != floors.end(); i++) {
@@ -36,6 +40,9 @@ public:
     }
     return isDrawing;
   }
+
+  int speedX;
+  int speedY;
 };
 
 class OneFireMeteor : public Meteor {
@@ -926,6 +933,67 @@ public:
   int lastFire;
 };
 
+class ThreeLightMeteor : public Meteor {
+  BaseMeteor meteors[15];
+  bool waitingNew;
+  int countOfMeteors;
+  DWORD lastMeteor;
+public:
+  ThreeLightMeteor() : Meteor() {countOfMeteors = lastMeteor = 0;}
+
+  virtual bool operation() override {
+    // ≈сли нужно создать новый метеорит - создаем его
+    if (GetTickCount() - lastMeteor > 250 && countOfMeteors < 15) {
+      double angle = ((rand()%30+30)*3.14)/180;
+      meteors[countOfMeteors].Cast(player);
+      meteors[countOfMeteors].speedX = meteors[countOfMeteors].speed * cos(angle);
+      meteors[countOfMeteors].speedY = meteors[countOfMeteors].speed * sin(angle);
+      countOfMeteors++;
+      lastMeteor = GetTickCount();
+    }
+    // ¬ыполн€ем каждый метеорит [который не упал еще]
+    bool anyoneCasting = false;
+    for (int i = 0; i < countOfMeteors; i++) {
+      BaseMeteor *meteor = &meteors[i];
+      if (!meteor->casting) continue;
+      meteor->speed = 8;
+      for (auto i = floors.begin(); i != floors.end(); i++) {
+        if ((*i)->CheckCollision(meteor)) {
+          int left = meteor->GetX() - meteor->GetRange();
+          int right = meteor->GetX() +meteor-> GetWidth() + meteor->GetRange();
+          for (auto it = enemies.begin(); it != enemies.end(); it++) {
+            if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
+              wchar_t text[5];
+              wsprintf(text, L"%d", GetDamage());
+              damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+              it->DamageHim(GetDamage());
+            }
+          }
+          meteor->casting = false;
+        }
+      }
+      if (meteor->casting) {
+        window.Draw(meteor);
+        switch (meteor->destination) {
+        case LEFT:
+          meteor->Move(-meteor->speedX, -meteor->speedY);
+          break;
+        case RIGHT:
+          meteor->Move(meteor->speedX, -meteor->speedY);
+          break;
+        default:
+          break;
+        }
+        anyoneCasting = true;
+      }
+    }
+    if (!anyoneCasting && countOfMeteors >= 14)
+      countOfMeteors = 0;
+    return anyoneCasting;
+  }
+
+};
+
 class MeteorFactory {
 public:
   MeteorFactory() {}
@@ -965,6 +1033,8 @@ public:
       return std::shared_ptr<Meteor>(new TwoFireAndOneIceMeteor(new BaseMeteor()));
     else if (impr.k1 == 3 && impr.k2 == 0 && impr.k3 == 0)
       return std::shared_ptr<Meteor>(new ThreeFireMeteor(new BaseMeteor()));
+    else if (impr.k1 == 0 && impr.k2 == 0 && impr.k3 == 3)
+      return std::shared_ptr<Meteor>(new ThreeLightMeteor());
     else
       return std::shared_ptr<Meteor>(new BaseMeteor());
   }
