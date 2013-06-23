@@ -562,6 +562,67 @@ public:
 
 };
 
+class TwoLightAndOneFireMeteor : public Meteor {
+  BaseMeteor meteors[3];
+  int movedDistance[3];
+  bool falled[3];
+  bool waitingNew;
+  bool createdNew;
+  int countOfMeteors;
+  DWORD lastMeteor;
+public:
+  TwoLightAndOneFireMeteor() { waitingNew = true; movedDistance[0] = movedDistance[1] = movedDistance[2] = 0; lastMeteor = 0; countOfMeteors = 0; createdNew = falled[0] = falled[1] = falled[2] = false;}
+
+  virtual bool operation() override {
+    // Если нужен новый метеорит - создать его
+    if (waitingNew) {
+      if (GetTickCount() - lastMeteor > 500 && countOfMeteors < 3) {
+        meteors[countOfMeteors].Cast(player);
+        waitingNew = false;
+        createdNew = true;
+      }
+    }
+    // Если создан новый метеорит, нужно запустить его
+    if (createdNew && countOfMeteors < 3) {
+      Meteor *meteor = &meteors[countOfMeteors];
+      meteor->speed = 8;
+      // Если долетел до земли - станим всех вокруг
+      if (!meteor->operation()) {
+        int left = GetX() - GetRange();
+        int right = meteor->GetX() + meteor->GetWidth() + meteor->GetRange();
+        for (auto it = enemies.begin(); it != enemies.end(); it++)
+          if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
+            it->Stun(1000);
+        falled[countOfMeteors] = true;
+        lastMeteor = GetTickCount();
+        countOfMeteors++;
+        waitingNew = true;
+      }
+    }
+    // Тем временем, нужно каждый упавший метеорит пускаааать по земле
+    for (int i = 0; i < 3; i++) {
+      if (movedDistance[i] <= 300 && falled[i]) {
+        window.Draw(&meteors[i]);
+        if (meteors[i].destination == LEFT)
+          meteors[i].Move(-meteors[i].speed, 0);
+        else
+          meteors[i].Move(meteors[i].speed, 0);
+        movedDistance[i] += meteors[i].speed;
+        for (auto it = enemies.begin(); it != enemies.end(); it++) {
+          if (it->CheckCollision(&meteors[i]) && !it->damage.UnderEffect()) {
+            wchar_t text[5];
+            wsprintf(text, L"%d", GetDamage());
+            damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+            it->DamageHim(GetDamage());
+          }
+        }
+      }
+    }
+    // Скилл заканчивается, когда все метеориты запущены, и все метеориты пролетели уже
+    return !(movedDistance[0] > 300 && movedDistance[1] > 300 && movedDistance[2] > 300);
+  }
+};
+
 class MeteorFactory {
 public:
   MeteorFactory() {}
@@ -589,6 +650,8 @@ public:
       return std::shared_ptr<Meteor>(new TwoIceAndOneFireMeteor(new BaseMeteor()));
     else if (impr.k1 == 0 && impr.k2 == 2 && impr.k3 == 1)
       return std::shared_ptr<Meteor>(new TwoIceAndOneLightMeteor(new BaseMeteor()));
+    else if (impr.k1 == 1 && impr.k2 == 0 && impr.k3 == 2)
+      return std::shared_ptr<Meteor>(new TwoLightAndOneFireMeteor());
     else
       return std::shared_ptr<Meteor>(new BaseMeteor());
   }
