@@ -490,6 +490,78 @@ public:
   int rightIce;
 };
 
+class TwoIceAndOneLightMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  TwoIceAndOneLightMeteor(Meteor *base) : base(base) {light = ice = false; countOfFrames = 0; falling = true; range = 200;}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    base->speed = 8;
+    if (!light && !ice) {
+      if (base->operation())
+        return true;
+      else
+        light = true;
+    }
+    if (light) {
+      window.Draw(base.get());
+      int left = base->GetX() - base->GetRange();
+      int right = base->GetX() + base->GetWidth() + base->GetRange();
+      for (auto it = enemies.begin(); it != enemies.end(); it++)
+        if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
+          it->Stun(1000);
+      ice = true;
+      light = false;
+    }
+    else if (ice) {
+      if (falling) {
+        window.Draw(base.get());
+        int left = base->GetX() - base->GetRange();
+        int right = base->GetX() + base->GetWidth() + base->GetRange();
+        for (auto it = enemies.begin(); it != enemies.end(); it++) {
+          if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
+            it->Freeze(2000);
+          }
+        }
+        falling = false;
+      }
+      if (!iceFromLandImage.IsValid()) {
+        iceFromLandImage.LoadFromFile("img\\ice_from_lang.png");
+        iceFromLand.SetImage(iceFromLandImage);
+        iceFromLand.SetY(base->GetY() - 21);
+      }
+      iceFromLand.Move(0, 1);
+      int left = base->GetX() - GetRange();
+      int right = base->GetX() + base->GetWidth() + GetRange();
+      if (countOfFrames == 21) {
+        for (auto it = enemies.begin(); it != enemies.end(); it++)
+          if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
+            it->DamageHim(25);
+        return false;
+      }
+      for (int i = left; i < right; i+=21) {
+        iceFromLand.SetX(i);
+        window.Draw(&iceFromLand);
+      }
+      countOfFrames++;
+      return true;
+    }
+    return true;
+  }
+
+  bool light;
+  bool ice;
+  bool falling;
+  int countOfFrames;
+  se::Sprite iceFromLand;
+  se::Image iceFromLandImage;
+
+};
+
 class MeteorFactory {
 public:
   MeteorFactory() {}
@@ -515,6 +587,8 @@ public:
       return std::shared_ptr<Meteor>(new TwoLightMeteor(new BaseMeteor()));
     else if (impr.k1 == 1 && impr.k2 == 2 && impr.k3 == 0)
       return std::shared_ptr<Meteor>(new TwoIceAndOneFireMeteor(new BaseMeteor()));
+    else if (impr.k1 == 0 && impr.k2 == 2 && impr.k3 == 1)
+      return std::shared_ptr<Meteor>(new TwoIceAndOneLightMeteor(new BaseMeteor()));
     else
       return std::shared_ptr<Meteor>(new BaseMeteor());
   }
