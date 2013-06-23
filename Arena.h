@@ -63,7 +63,13 @@ void InitBackgrounds() {
 }
 
 void InitFloors() {
-  floors.push_back(new se::Line(0, 4000, window.GetHeight()/4-50));
+  for (int i = 0; i < 64*50; i+=64) {
+    se::Image image;
+    image.LoadFromFile("img\\ground.png");
+    Entity entity(i, 0);
+    entity.SetImage(image);
+    floors.push_back(new Entity(entity));
+  }
 }
 
 void InitSpheres() {
