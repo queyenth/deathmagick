@@ -97,7 +97,7 @@ public:
     int right = base->GetX() + base->GetWidth() + base->GetRange();
     for (auto it = enemies.begin(); it != enemies.end(); it++) {
       if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
-        it->Freeze(2000);
+        it->Freeze(5000);
       }
     }
     return false;
@@ -129,7 +129,7 @@ public:
     int right = base->GetX() + base->GetWidth() + base->GetRange();
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
-        it->Freeze(2000);
+        it->Freeze(5000);
     return false;
   }
 
@@ -256,7 +256,7 @@ public:
     int right = base->GetX() + base->GetWidth() + base->GetRange();
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
-        it->Freeze(2000);
+        it->Freeze(5000);
         it->Stun(2000);
       }
     return false;
@@ -281,7 +281,7 @@ public:
       int right = base->GetX() + base->GetWidth() + base->GetRange();
       for (auto it = enemies.begin(); it != enemies.end(); it++)
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
-          it->Freeze(2000);
+          it->Freeze(5000);
           it->Stun(2000);
         }
       FireTime = true;
@@ -333,7 +333,7 @@ public:
       int right = base->GetX() + base->GetWidth() + base->GetRange();
       for (auto it = enemies.begin(); it != enemies.end(); it++) {
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
-          it->Freeze(2000);
+          it->Freeze(5000);
         }
       }
       falling = false;
@@ -399,7 +399,7 @@ public:
       int right = base->GetX() + base->GetWidth() + base->GetRange();
       for (auto it = enemies.begin(); it != enemies.end(); it++)
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
-          it->Stun(1000);
+          it->Stun(2000);
       lastMeteor = GetTickCount();
       return true;
     }
@@ -428,7 +428,7 @@ public:
       int right = base->GetX() + base->GetWidth() + base->GetRange();
       for (auto it = enemies.begin(); it != enemies.end(); it++) {
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
-          it->Freeze(2000);
+          it->Freeze(5000);
         }
       }
       falling = false;
@@ -513,7 +513,7 @@ public:
       int right = base->GetX() + base->GetWidth() + base->GetRange();
       for (auto it = enemies.begin(); it != enemies.end(); it++)
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
-          it->Stun(1000);
+          it->Stun(2000);
       ice = true;
       light = false;
     }
@@ -524,7 +524,7 @@ public:
         int right = base->GetX() + base->GetWidth() + base->GetRange();
         for (auto it = enemies.begin(); it != enemies.end(); it++) {
           if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
-            it->Freeze(2000);
+            it->Freeze(5000);
           }
         }
         falling = false;
@@ -623,6 +623,52 @@ public:
   }
 };
 
+class TwoLightAndOneIceMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+  int countOfMeteors;
+  DWORD lastMeteor;
+  bool waitingNew;
+public:
+  TwoLightAndOneIceMeteor(Meteor *base) : base(base) {lastMeteor = 0; countOfMeteors = 0; waitingNew = false;}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    if (waitingNew) {
+      if (GetTickCount() - lastMeteor > 500) {
+        base->Cast(player);
+        countOfMeteors++;
+        waitingNew = false;
+      }
+      return true;
+    }
+    if (countOfMeteors != 3) {
+      base->speed = 8;
+      if (base->operation()) {
+        return true;
+      }
+      else
+        waitingNew = true;
+      window.Draw(base.get());
+      int left = GetX() - GetRange();
+      int right = base->GetX() + base->GetWidth() + base->GetRange();
+      for (auto it = enemies.begin(); it != enemies.end(); it++)
+        if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
+          it->Stun(2000);
+          it->Freeze(5000);
+        }
+      lastMeteor = GetTickCount();
+      return true;
+    }
+    countOfMeteors = 0;
+    waitingNew = false;
+    return false;
+  }
+
+};
+
 class MeteorFactory {
 public:
   MeteorFactory() {}
@@ -652,6 +698,8 @@ public:
       return std::shared_ptr<Meteor>(new TwoIceAndOneLightMeteor(new BaseMeteor()));
     else if (impr.k1 == 1 && impr.k2 == 0 && impr.k3 == 2)
       return std::shared_ptr<Meteor>(new TwoLightAndOneFireMeteor());
+    else if (impr.k1 == 0 && impr.k2 == 1 && impr.k3 == 2)
+      return std::shared_ptr<Meteor>(new TwoLightAndOneIceMeteor(new BaseMeteor()));
     else
       return std::shared_ptr<Meteor>(new BaseMeteor());
   }
