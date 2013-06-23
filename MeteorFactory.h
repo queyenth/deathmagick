@@ -843,6 +843,89 @@ public:
   int lastFire;
 };
 
+class ThreeFireMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  ThreeFireMeteor(Meteor *base) : base(base) {WaveTime = FireTime = false; movedDistance = waveTimes = lastFire = 0;}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    if (!FireTime) {
+      if (base->operation())
+        return true;
+      FireTime = true;
+    }
+    if (WaveTime) {
+      if (waveTimes == 25) {
+        waveTimes = 0;
+        int left = waveSprite.GetX();
+        int right = waveSprite.GetX()+waveSprite.GetWidth();
+        for (auto it = enemies.begin(); it != enemies.end(); it++) {
+          if (left <= it->GetX() && it->GetX()+it->GetWidth() <= right) {
+            damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(L"200", font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+            it->DamageHim(200);
+          }
+        }
+        return false;
+      }
+      waveSprite.SetWidth(50+waveTimes*8);
+      waveSprite.SetHeight(20+waveTimes*8);
+      waveSprite.SetX(base->GetX()-waveSprite.GetWidth()/2);
+      waveTimes++;
+      window.Draw(&waveSprite);
+      return true;
+    }
+    if (!fireImage.IsValid()) {
+      fireImage.LoadFromFile("img\\fire.png");
+      fireSprite.SetImage(fireImage);
+      fireSprite.SetY(base->GetY());
+      waveImage.LoadFromFile("img\\sphere.png");
+      waveSprite.SetImage(waveImage);
+      waveSprite.SetColor(se::Color(1.0f, 1.0f, 1.0f, 0.7f));
+      waveSprite.SetY(base->GetY());
+    }
+    if (movedDistance > 300) {
+      movedDistance = 0;
+      WaveTime = true;// Make boom
+      return true;
+    }
+    window.Draw(base.get());
+    if (base->GetX() - lastFire > fireSprite.GetWidth()) {
+      lastFire = base->GetX();
+      fireSprite.SetX(lastFire);
+      damageString.push_back(DrawSomeTime(std::shared_ptr<se::Sprite>(new se::Sprite(fireSprite)), 3000));
+    }
+    if (base->destination == LEFT)
+      base->Move(-base->speed, 0);
+    else
+      base->Move(base->speed, 0);
+    movedDistance += base->speed;
+    for (auto it = enemies.begin(); it != enemies.end(); it++) {
+      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
+        wchar_t text[5];
+        wsprintf(text, L"%d", GetDamage());
+        damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+        it->DamageHim(GetDamage());
+      }
+    }
+    return true;
+  }
+
+  bool FireTime;
+  bool WaveTime;
+  int movedDistance;
+  int waveTimes;
+
+  se::Image fireImage;
+  se::Sprite fireSprite;
+  se::Image waveImage;
+  se::Sprite waveSprite;
+  int lastFire;
+};
+
 class MeteorFactory {
 public:
   MeteorFactory() {}
@@ -880,6 +963,8 @@ public:
       return std::shared_ptr<Meteor>(new TwoFireAndOneLightMeteor(new BaseMeteor()));
     else if (impr.k1 == 2 && impr.k2 == 1 && impr.k3 == 0)
       return std::shared_ptr<Meteor>(new TwoFireAndOneIceMeteor(new BaseMeteor()));
+    else if (impr.k1 == 3 && impr.k2 == 0 && impr.k3 == 0)
+      return std::shared_ptr<Meteor>(new ThreeFireMeteor(new BaseMeteor()));
     else
       return std::shared_ptr<Meteor>(new BaseMeteor());
   }
