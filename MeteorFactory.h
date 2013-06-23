@@ -931,6 +931,55 @@ public:
 
 };
 
+class ThreeIceMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  ThreeIceMeteor(Meteor *base) : base(base) { sphereTime = false; }
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    // Если время сферы, рисовать ее
+    if (sphereTime) {
+      if (!iceSphereImage.IsValid()) {
+        iceSphereImage.LoadFromFile("img\\ice_sphere.png");
+        iceSphereSprite.SetImage(iceSphereImage);
+        iceSphereSprite.SetX(base->GetX()-150);
+        iceSphereSprite.SetY(base->GetY());
+        iceSphereSprite.SetWidth(300);
+        iceSphereSprite.SetHeight(150);
+        iceSphereSprite.SetColor(se::Color(1.0f, 1.0f, 1.0f, 0.5f));
+        fallingTime = secondRemaining =  GetTickCount();
+      }
+      if (secondRemaining - fallingTime > 5000)
+        return false;
+      else {
+        window.Draw(&iceSphereSprite);
+        if (GetTickCount() - secondRemaining > 1000) {
+          secondRemaining = GetTickCount();
+          for (auto i = enemies.begin(); i != enemies.end(); i++)
+            if (i->CheckCollision(base.get())) {
+              i->DamageHim(15);
+              i->Freeze(5000);
+            }
+        }
+      }
+    }
+    // Если не упал, пусть потихоньку падает
+    if (!base->operation())
+      sphereTime = true;
+    return true;
+  }
+
+  se::Image iceSphereImage;
+  se::Sprite iceSphereSprite;
+  DWORD fallingTime;
+  DWORD secondRemaining;
+  bool sphereTime;
+};
+
 class MeteorFactory {
 public:
   MeteorFactory() {}
@@ -972,6 +1021,8 @@ public:
       return std::shared_ptr<Meteor>(new ThreeFireMeteor(new BaseMeteor()));
     else if (impr.k1 == 0 && impr.k2 == 0 && impr.k3 == 3)
       return std::shared_ptr<Meteor>(new ThreeLightMeteor());
+    else if (impr.k1 == 0 && impr.k2 == 3 && impr.k3 == 0)
+      return std::shared_ptr<Meteor>(new ThreeIceMeteor(new BaseMeteor()));
     else
       return std::shared_ptr<Meteor>(new BaseMeteor());
   }
