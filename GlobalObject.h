@@ -8,7 +8,7 @@
 #include "Enemy.h"
 #include "Impr.h"
 
-se::Window window(L"Untitled Game", 640, 480, false);
+se::Window window(L"Untitled Game", 1920, 1080, true);
 const se::Input &input = window.GetInput();
 se::Camera &camera = window.GetCamera();
 se::Font *font;
