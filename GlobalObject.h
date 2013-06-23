@@ -18,7 +18,8 @@ se::Image sphereImages[3];
 std::vector<PhysicsObject *> floors;
 Player player;
 vector<Enemy> enemies;
-std::vector<DrawSomeTime> damageString;
+std::vector<DrawSomeTime<se::String>> damageString;
+std::vector<DrawSomeTime<Entity>> effects;
 
 enum GameState { MENU_INIT, MENU, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT };
 

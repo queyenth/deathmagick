@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Entity.h"
-#include "EntityEffect.h"
-#include "String.hpp"
+#include "GlobalObject.h"
 
-#include "Window.hpp"
+extern std::vector<DrawSomeTime<se::String>> damageString;
+extern se::Font *font;
 
 class Enemy : public Entity {
 public:
@@ -20,14 +19,18 @@ public:
     currentJump = maxJump;
   }
 
-  void DamageHim(int damage) {
-	  if (health - damage <= 0)
+  void DamageHim(int damageSize) {
+    if (damage.UnderEffect()) return ;
+	  if (health - damageSize <= 0)
       health = 0;
 	  else
-	    health -= damage;
-    this->damage.SetLong(2000);
-    this->damage.MakeEffect();
-    SetColor(this->damage.GetColor());
+	    health -= damageSize;
+    wchar_t text[5];
+    wsprintf(text, L"%d", damageSize);
+    damageString.push_back(DrawSomeTime<se::String>(std::shared_ptr<se::String>(new se::String(text, font, x+GetWidth(), y+GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+    damage.SetLong(500);
+    damage.MakeEffect();
+    SetColor(damage.GetColor());
   }
 
   void Freeze(DWORD howLong) {
