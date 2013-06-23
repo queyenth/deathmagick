@@ -8,8 +8,6 @@
 
 enum Destination { LEFT, RIGHT };
 
-int backgroundScroll1;
-int backgroundScroll2;
 Destination destination;
 se::Image playerImg;
 se::Sprite spheres[3];
@@ -20,8 +18,8 @@ se::Sprite stair(880, window.GetHeight()/4);
 se::Image stairImage;
 se::Sprite health(0, window.GetHeight()-10, player.GetHealth(), 10, se::Color(0.8f, 0.2f, 0.2f), true);
 int stairHeight;
-se::Sprite backgrounds[2];
-se::Image backgroundImage;
+se::Sprite clouds[10];
+se::Image cloudImage;
 std::vector<std::shared_ptr<Skill>> skillsOnFrame;
 bool moved = false;
 
@@ -53,16 +51,15 @@ void InitStairs() {
 }
 
 void InitBackgrounds() {
-  backgroundImage.LoadFromFile("img\\arena_back.png");
-  for (int i = 0; i < 2; i++) {
-    backgrounds[i].SetImage(backgroundImage);
-    backgrounds[i].SetWidth(window.GetWidth());
-    backgrounds[i].SetHeight(window.GetHeight());
-    backgrounds[i].SetFixedMode(true);
+  cloudImage.LoadFromFile("img\\cloud.png");
+  for (int i = 0; i < 10; i++) {
+    srand(GetTickCount());
+    clouds[i].SetImage(cloudImage);
+    clouds[i].SetFixedMode(true);
+    clouds[i].SetX(rand()%4000);
+    clouds[i].SetY(rand()%window.GetHeight());
+    clouds[i].SetFixedMode(true);
   }
-  backgrounds[1].SetX(window.GetWidth());
-  backgroundScroll1 = 0;
-  backgroundScroll2 = window.GetWidth();
 }
 
 void InitFloors() {
@@ -166,31 +163,14 @@ void DrawArena() {
   else if (moved) {
     camera.OffsetViewByX(player.GetX() - middle);
     if (destination == LEFT) {
-      backgroundScroll1++;
-      backgroundScroll2++;
-      if (backgroundScroll1 > window.GetWidth()) {
-        backgroundScroll1 = -window.GetWidth();
-      }
-      if (backgroundScroll2 > window.GetWidth()) {
-        backgroundScroll2 = -window.GetWidth();
-      }
-
-      backgrounds[0].SetX(backgroundScroll1);
-      backgrounds[1].SetX(backgroundScroll2);
+      for (int i = 0; i < 10; i++)
+        clouds[i].SetX(clouds[i].GetX()+1);
     }
     else {
-      backgroundScroll1--;
-      backgroundScroll2--;
-      if (backgroundScroll1 < -window.GetWidth()) {
-        backgroundScroll1 = window.GetWidth();
-      }
-      if (backgroundScroll2 < -window.GetWidth()) {
-        backgroundScroll2 = window.GetWidth();
-      }
-
-      backgrounds[0].SetX(backgroundScroll1);
-      backgrounds[1].SetX(backgroundScroll2);
+      for (int i = 0; i < 10; i++)
+        clouds[i].SetX(clouds[i].GetX()-1);
     }
+    
     moved = false;
   }
   
@@ -218,14 +198,14 @@ void DrawArena() {
     //i->Tick(floors);
   }
 
-  window.Clear(se::Color(0.0f, 0.0f, 0.0f));
+  window.Clear(se::Color(0.258f, 0.66f, 1.0f));
 
   if (!player.IsAlive())
     currentState = ARENA_DEINIT;
   
   // Drawing background
-  for (int i = 0; i < 2; i++)
-    window.Draw(&backgrounds[i]);
+  for (int i = 0; i < 10; i++)
+    window.Draw(&clouds[i]);
 
   // Drawing floor
   for (auto i = floors.begin(); i != floors.end(); i++)
