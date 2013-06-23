@@ -410,6 +410,86 @@ public:
 
 };
 
+class TwoIceAndOneFireMeteor : public Meteor {
+  std::shared_ptr<Meteor> base;
+public:
+  TwoIceAndOneFireMeteor(Meteor *base) : base(base) {range = 200; countOfFrames = 0; falling = true; movedDistance = 0; iceMaked = false; leftIce = rightIce = 0;}
+
+  virtual void Cast(Player &player) override {
+    base->Cast(player);
+  }
+
+  virtual bool operation() override {
+    if (base->operation())
+      return true;
+    if (falling) {
+      window.Draw(base.get());
+      int left = base->GetX() - base->GetRange();
+      int right = base->GetX() + base->GetWidth() + base->GetRange();
+      for (auto it = enemies.begin(); it != enemies.end(); it++) {
+        if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
+          it->Freeze(2000);
+        }
+      }
+      falling = false;
+      iceMaked = true;
+    }
+    else if (iceMaked) {
+      if (!iceFromLandImage.IsValid()) {
+        iceFromLandImage.LoadFromFile("img\\ice_from_lang.png");
+        iceFromLand.SetImage(iceFromLandImage);
+        iceFromLand.SetY(base->GetY() - 21);
+      }
+    
+      if (leftIce == rightIce && rightIce == 0) {
+        leftIce = base->GetX() - GetRange();
+        rightIce = base->GetX() + base->GetWidth() + GetRange();
+      }
+      
+      for (int i = leftIce; i < rightIce; i+=21) {
+        iceFromLand.SetX(i);
+        window.Draw(&iceFromLand);
+      }
+    
+      iceFromLand.Move(0, 1);
+      if (countOfFrames == 21) {
+        for (auto it = enemies.begin(); it != enemies.end(); it++)
+          if (leftIce <= it->GetX() && it->GetX() + it->GetWidth() <= rightIce)
+            it->DamageHim(25);
+        iceMaked = false;
+      }
+      countOfFrames++;
+    }
+    if (movedDistance > 300) return false;
+    else {
+      window.Draw(base.get());
+      if (base->destination == LEFT)
+        base->Move(-base->speed, 0);
+      else
+        base->Move(base->speed, 0);
+      movedDistance += base->speed;
+      for (auto it = enemies.begin(); it != enemies.end(); it++) {
+        if (it->CheckCollision(base.get()) && !it->damage.UnderEffect()) {
+          wchar_t text[5];
+          wsprintf(text, L"%d", GetDamage());
+          damageString.push_back(DrawSomeTime(std::make_shared<se::String>(se::String(text, font, it->GetX()+it->GetWidth()+2, it->GetY()+it->GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+          it->DamageHim(GetDamage());
+        }
+      }
+    }
+    return true;
+  }
+
+  se::Sprite iceFromLand;
+  se::Image iceFromLandImage;
+  int countOfFrames;
+  bool falling;
+  bool iceMaked;
+  int movedDistance;
+  int leftIce;
+  int rightIce;
+};
+
 class MeteorFactory {
 public:
   MeteorFactory() {}
@@ -433,6 +513,8 @@ public:
       return std::shared_ptr<Meteor>(new TwoIceMeteor(new BaseMeteor()));
     else if (impr.k1 == 0 && impr.k2 == 0 && impr.k3 == 2)
       return std::shared_ptr<Meteor>(new TwoLightMeteor(new BaseMeteor()));
+    else if (impr.k1 == 1 && impr.k2 == 2 && impr.k3 == 0)
+      return std::shared_ptr<Meteor>(new TwoIceAndOneFireMeteor(new BaseMeteor()));
     else
       return std::shared_ptr<Meteor>(new BaseMeteor());
   }
