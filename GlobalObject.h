@@ -8,12 +8,17 @@
 #include "Enemy.h"
 #include "Impr.h"
 
-se::Window window(L"Untitled Game", 1920, 1080, true);
+enum GameState { MENU_INIT, MENU, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT };
+GameState currentState = MENU_INIT;
+
+se::Window window(L"Untitled Game", 1024, 768, false);
 const se::Input &input = window.GetInput();
 se::Camera &camera = window.GetCamera();
 se::Font *font;
+se::Font *menuFont;
 std::vector<tagIMPR> imprs;
 se::Sprite backMenu = se::Sprite(0, 0, window.GetWidth(), window.GetHeight());
+se::Image backimage;
 se::Image sphereImages[3];
 std::vector<PhysicsObject *> floors;
 //std::vector<Entity> floors;
@@ -21,27 +26,5 @@ Player player;
 vector<Enemy> enemies;
 std::vector<DrawSomeTime<se::String>> damageString;
 std::vector<DrawSomeTime<Entity>> effects;
-
-enum GameState { MENU_INIT, MENU, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT };
-
-GameState currentState = MENU_INIT;
-
-void PlayPressed(void *data) {
-  currentState = MENU;
-}
-
-void ArenaPressed(void *data) {
-  currentState = ARENA_INIT;
-}
-
-void QuitPressed(void *data) {
-  currentState = QUIT;
-}
-
-void ContinuePressed(void *data) {
-  currentState = ARENA_PLAY;
-}
-
-void SkillsPressed(void *data) {
-  currentState = SKILLS;
-}
+se::Sprite arrow;
+se::Image arrowImg;

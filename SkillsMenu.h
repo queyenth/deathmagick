@@ -22,12 +22,14 @@ void InitSkillsMenu() {
   baseSprite.SetX(window.GetWidth()/2-100);
   baseSprite.SetY(window.GetHeight()/2-150);
   baseSprite.SetImage(baseImage);
+  baseSprite.SetFixedMode(true);
   skillSprite.SetX(baseSprite.GetX()+28);
   skillSprite.SetY(baseSprite.GetY()+baseSprite.GetHeight()-156);
+  skillSprite.SetFixedMode(true);
   name.SetX(baseSprite.GetX() + baseSprite.GetWidth()/2 - 45);
   name.SetY(baseSprite.GetY() + baseSprite.GetHeight() - 18);
   name.SetFont(font);
-  name.SetText(L"");
+  name.SetFixedMode(true);
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       spheresForMenu[i][j].SetImage(sphereImages[i]);
@@ -35,6 +37,7 @@ void InitSkillsMenu() {
       spheresForMenu[i][j].SetY(baseSprite.GetY()+(80 - j*35));
       spheresForMenu[i][j].SetWidth(30);
       spheresForMenu[i][j].SetHeight(30);
+      spheresForMenu[i][j].SetFixedMode(true);
     }
   }
   currentSkill = 0;
@@ -72,7 +75,7 @@ void DrawSkills() {
     break;
   }
   
-  window.Clear(se::Color(0.0f, 0.0f, 0.0f));
+  window.Clear(se::Color(0.62f, 0.62f, 0.62f));
   window.Draw(&baseSprite);
   window.Draw(&name);
   window.Draw(&skillSprite);

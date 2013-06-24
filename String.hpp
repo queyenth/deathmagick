@@ -22,7 +22,6 @@ private:
   void Render() const;
 
   std::wstring text;
-  std::wstring fontName;
   Font *font;
 };
 

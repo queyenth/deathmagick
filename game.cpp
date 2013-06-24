@@ -15,7 +15,6 @@ int main() {
   _CrtMemState _ms;
   _CrtMemCheckpoint(&_ms);
 
-  InitMenuImages();
   srand(time(NULL));
   
   // FIXME: Improve gameloop :3
@@ -33,7 +32,9 @@ int main() {
       break;
     case MENU_INIT:
       font = new se::Font(window.GetDC(), L"Courier New", 18);
-      ShowCursor(TRUE);
+      menuFont = new se::Font(window.GetDC(), L"Arial", 28);
+      backimage.LoadFromFile("img\\back.png");
+      backMenu.SetImage(backimage);
       InitMenuImages();
       currentState = MENU;
       break;
@@ -41,11 +42,10 @@ int main() {
       //DrawPause();
       break;
     case GAME_MENU:
-      ShowCursor(TRUE);
       DrawGameMenu();
-      InitSkillsMenu();
       break;
     case SKILLS:
+      InitSkillsMenu();
       DrawSkills();
       break;
     case ARENA_INIT:
