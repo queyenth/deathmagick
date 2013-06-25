@@ -707,7 +707,7 @@ public:
 class TwoFireAndOneLightMeteor : public Meteor {
   std::shared_ptr<Meteor> base;
 public:
-  TwoFireAndOneLightMeteor(Meteor *base) : base(base) {FireTime = false; movedDistance = 0; lastFire = 0;}
+  TwoFireAndOneLightMeteor(Meteor *base) : base(base) {FireTime = false; movedDistance = 0;}
 
   virtual void Cast(Player &player) override {
     base->Cast(player);
@@ -724,6 +724,7 @@ public:
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
           it->Stun(1000);
       FireTime = true;
+      lastFire = base->GetX();
     }
     if (!fireImage.IsValid()) {
       fireImage.LoadFromFile("img\\fire.png");
@@ -782,6 +783,7 @@ public:
       for (auto it = enemies.begin(); it != enemies.end(); it++)
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
           it->Freeze(5000);
+      lastFire = base->GetX();
       FireTime = true;
     }
     if (!fireImage.IsValid()) {
@@ -837,6 +839,7 @@ public:
       if (base->operation())
         return true;
       FireTime = true;
+      lastFire = base->GetX();
     }
     if (WaveTime) {
       if (waveTimes == 25) {
@@ -870,7 +873,12 @@ public:
       return true;
     }
     window.Draw(base.get());
-    if (base->GetX() - lastFire > fireSprite.GetWidth()) {
+    if (base->GetX() - lastFire > fireSprite.GetWidth() && !base->IsFlippedX()) {
+      lastFire = base->GetX();
+      fireSprite.SetX(lastFire);
+      effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
+    }
+    else if (lastFire - base->GetX() > fireSprite.GetWidth() && base->IsFlippedX()) {
       lastFire = base->GetX();
       fireSprite.SetX(lastFire);
       effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
@@ -899,7 +907,7 @@ public:
 };
 
 class ThreeLightMeteor : public Meteor {
-  BaseMeteor meteors[15];
+  BaseMeteor meteors[20];
   bool waitingNew;
   int countOfMeteors;
   DWORD lastMeteor;
@@ -908,7 +916,7 @@ public:
 
   virtual bool operation() override {
     // ≈сли нужно создать новый метеорит - создаем его
-    if (GetTickCount() - lastMeteor > 250 && countOfMeteors < 15) {
+    if (GetTickCount() - lastMeteor > 250 && countOfMeteors < 20) {
       double angle = (70*3.14)/180;
       if (!meteors[countOfMeteors].imageLoaded) meteors[countOfMeteors].LoadImage();
       meteors[countOfMeteors].destination = RIGHT;
@@ -916,8 +924,8 @@ public:
       meteors[countOfMeteors].SetY(player.GetY() + 200);
       meteors[countOfMeteors].casting = true;
       meteors[countOfMeteors].isDrawing = true;
-      meteors[countOfMeteors].speedX = meteors[countOfMeteors].speed * cos(angle);
-      meteors[countOfMeteors].speedY = meteors[countOfMeteors].speed * sin(angle);
+      meteors[countOfMeteors].speedX = 8 * cos(angle);
+      meteors[countOfMeteors].speedY = 8 * sin(angle);
 
       countOfMeteors++;
       lastMeteor = GetTickCount();
@@ -953,7 +961,7 @@ public:
         anyoneCasting = true;
       }
     }
-    if (!anyoneCasting && countOfMeteors >= 14)
+    if (!anyoneCasting && countOfMeteors >= 19)
       countOfMeteors = 0;
     return anyoneCasting;
   }

@@ -3,6 +3,7 @@
 #include "GlobalObject.h"
 #include "Line.h"
 #include "SkillFactory.h"
+#include "LevelLoader.h"
 
 #include <algorithm>
 
@@ -23,27 +24,6 @@ se::Image cloudImage;
 std::vector<std::shared_ptr<Skill>> skillsOnFrame;
 bool moved = false;
 
-void InitEnemies() {
-  playerImg.LoadFromFile("img\\player.png");
-  for (int i = 0; i < 10; i++) {
-    Enemy enemy;
-    enemy.SetX((i+1)*300);
-    enemy.SetImage(playerImg);
-    enemy.SetY(window.GetHeight()/2);
-    enemies.push_back(enemy);
-  }
-}
-
-void InitPlayer() {
-  playerImg.LoadFromFile("img\\player.png");
-  player.SetImage(playerImg);
-  player.SetX(5);
-  player.SetY(window.GetHeight()/3);
-  player.health = 100;
-  player.experience = 0;
-  player.speed = 3;
-}
-
 void InitStairs() {
   //stairImage.LoadFromFile("img\\stair.png");
   //stair.SetImage(stairImage);
@@ -59,16 +39,6 @@ void InitBackgrounds() {
     clouds[i].SetX(rand()%3200);
     clouds[i].SetY(rand()%window.GetHeight());
     clouds[i].SetFixedMode(true);
-  }
-}
-
-void InitFloors() {
-  for (int i = 0; i < 64*50; i+=64) {
-    se::Image image;
-    image.LoadFromFile("img\\ground.png");
-    Entity entity(i, 0);
-    entity.SetImage(image);
-    floors.push_back(new Entity(entity));
   }
 }
 
@@ -93,11 +63,10 @@ void InitImprs() {
 
 void InitArena() {
   ShowCursor(FALSE);
+  LevelLoader loader;
+  loader.LoadLevel("first", player, floors, enemies);
   InitBackgrounds();
-  InitFloors();
   InitStairs();
-  InitPlayer();
-  InitEnemies();
   InitSpheres();
   InitImprs();
 }
@@ -192,16 +161,16 @@ void DrawArena() {
   player.Tick(floors);
   health.SetWidth(player.GetHealth()*2);
 
-  int countOfDied = 0;
-  enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&countOfDied](Enemy t) -> bool { if (!t.IsAlive()) countOfDied++; return !t.IsAlive(); }), enemies.end());
   damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime<se::String> t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
   effects.erase(std::remove_if(effects.begin(), effects.end(), [](DrawSomeTime<Entity> t) { return GetTickCount() - t.firstTime > t.time; }), effects.end());
   skillsOnFrame.erase(std::remove_if(skillsOnFrame.begin(), skillsOnFrame.end(), [](std::shared_ptr<Skill> t) { return !t->casting; }), skillsOnFrame.end());
+
+  int countOfDied = 0;
+  enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&countOfDied](Enemy t) -> bool { if (!t.IsAlive()) countOfDied++; return !t.IsAlive(); }), enemies.end());
   player.experience += countOfDied*12;
   
   for (auto i = enemies.begin(); i != enemies.end(); i++) {
     i->AITick(floors);
-    //i->Tick(floors);
   }
 
   window.Clear(se::Color(0.258f, 0.66f, 1.0f));
