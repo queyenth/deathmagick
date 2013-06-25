@@ -19,13 +19,13 @@ public:
   }
 
   virtual void Cast(Player &player) override {
+    destination = player.IsFlippedX() ? LEFT : RIGHT;
     if (!imageLoaded) LoadImage();
     SetX(player.GetX() + (destination == RIGHT ? 10 : -10));
     SetY(player.GetY() + 200);
     casting = true;
     isDrawing = true;
     FlipX(player.IsFlippedX());
-    destination = IsFlippedX() ? LEFT : RIGHT;
   }
 
   bool imageLoaded;

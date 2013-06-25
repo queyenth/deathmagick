@@ -18,7 +18,7 @@ se::Sprite stair(880, window.GetHeight()/4);
 se::Image stairImage;
 se::Sprite health(0, window.GetHeight()-10, player.GetHealth(), 10, se::Color(0.8f, 0.2f, 0.2f), true);
 int stairHeight;
-se::Sprite clouds[10];
+se::Sprite clouds[30];
 se::Image cloudImage;
 std::vector<std::shared_ptr<Skill>> skillsOnFrame;
 bool moved = false;
@@ -52,11 +52,11 @@ void InitStairs() {
 
 void InitBackgrounds() {
   cloudImage.LoadFromFile("img\\cloud.png");
-  for (int i = 0; i < 10; i++) {
-    srand(GetTickCount());
+  for (int i = 0; i < 30; i++) {
+    //srand(GetTickCount());
     clouds[i].SetImage(cloudImage);
     clouds[i].SetFixedMode(true);
-    clouds[i].SetX(rand()%4000);
+    clouds[i].SetX(rand()%3200);
     clouds[i].SetY(rand()%window.GetHeight());
     clouds[i].SetFixedMode(true);
   }
@@ -146,21 +146,21 @@ void DrawArena() {
     else
       player.Jump();
   }
+  else if (input.IsKeyPressed('S')) {
+    if (player.inAir == Player::ONSTAIR)
+      player.Move(0, -3);
+  }
   if (input.IsKeyPressed('A')) {
     player.TryToMove(-1, 0, floors);
     destination = LEFT;
     moved = true;
     player.FlipX(true);
   }
-  if (input.IsKeyPressed('D')) {
+  else if (input.IsKeyPressed('D')) {
     player.TryToMove(1, 0, floors);
     destination = RIGHT;
     moved = true;
     player.FlipX(false);
-  }
-  if (input.IsKeyPressed('S')) {
-    if (player.inAir == Player::ONSTAIR)
-      player.Move(0, -3);
   }
 
   int middle = window.GetWidth()/3 + camera.GetViewX();
@@ -169,11 +169,11 @@ void DrawArena() {
   else if (moved) {
     camera.OffsetViewByX(player.GetX() - middle);
     if (destination == LEFT) {
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < 30; i++)
         clouds[i].SetX(clouds[i].GetX()+1);
     }
     else {
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < 30; i++)
         clouds[i].SetX(clouds[i].GetX()-1);
     }
     
@@ -210,7 +210,7 @@ void DrawArena() {
     currentState = ARENA_DEINIT;
   
   // Drawing background
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 30; i++)
     window.Draw(&clouds[i]);
 
   // Drawing floor

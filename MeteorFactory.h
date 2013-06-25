@@ -67,7 +67,7 @@ public:
       base->Move(base->speed, 0);
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
+      if (it->CheckCollision(base.get()))
         it->DamageHim(GetDamage());
     return true;
   }
@@ -90,7 +90,7 @@ public:
     if (base->operation())
       return true;
     window.Draw(base.get());
-    int left = GetX() - GetRange();
+    int left = base->GetX() - base->GetRange();
     int right = base->GetX() + base->GetWidth() + base->GetRange();
     for (auto it = enemies.begin(); it != enemies.end(); it++) {
       if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
@@ -122,7 +122,7 @@ public:
 
   bool Ice() {
     window.Draw(base.get());
-    int left = GetX() - GetRange();
+    int left = base->GetX() - base->GetRange();
     int right = base->GetX() + base->GetWidth() + base->GetRange();
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
@@ -142,7 +142,7 @@ public:
       base->Move(base->speed, 0);
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
+      if (it->CheckCollision(base.get()))
         it->DamageHim(GetDamage());
     return true;
   }
@@ -165,7 +165,7 @@ public:
     if (base->operation())
       return true;
     window.Draw(base.get());
-    int left = GetX() - GetRange();
+    int left = base->GetX() - base->GetRange();
     int right = base->GetX() + base->GetWidth() + base->GetRange();
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
@@ -196,12 +196,13 @@ public:
   }
 
   bool Light() {
-    window.Draw(base.get());
-    int left = GetX() - GetRange();
-    int right = base->GetX() + base->GetWidth() + base->GetRange();
+    int left, right;
+    left = base->GetX() - base->GetRange();
+    right = base->GetX() + base->GetWidth() + base->GetRange();
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
-        it->Stun(2000);
+        it->Stun(1500);
+    window.Draw(base.get());
     return false;
   }
 
@@ -217,7 +218,7 @@ public:
       base->Move(base->speed, 0);
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
+      if (it->CheckCollision(base.get()))
         it->DamageHim(GetDamage());
     return true;
   }
@@ -236,6 +237,7 @@ public:
   }
 
   virtual bool operation() override {
+    base->speed = 8;
     if (base->operation())
       return true;
     window.Draw(base.get());
@@ -244,7 +246,7 @@ public:
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
         it->Freeze(5000);
-        it->Stun(2000);
+        it->Stun(1500);
       }
     return false;
   }
@@ -260,6 +262,7 @@ public:
   }
 
   virtual bool operation() override {
+    base->speed = 8;
     if (!FireTime) {
       if (base->operation())
         return true;
@@ -269,7 +272,7 @@ public:
       for (auto it = enemies.begin(); it != enemies.end(); it++)
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right) {
           it->Freeze(5000);
-          it->Stun(2000);
+          it->Stun(1500);
         }
       FireTime = true;
     }
@@ -288,7 +291,7 @@ public:
       base->Move(base->speed, 0);
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
+      if (it->CheckCollision(base.get()))
         it->DamageHim(GetDamage());
     return true;
   }
@@ -377,11 +380,11 @@ public:
       else
         waitingNew = true;
       window.Draw(base.get());
-      int left = GetX() - GetRange();
+      int left = base->GetX() - base->GetRange();
       int right = base->GetX() + base->GetWidth() + base->GetRange();
       for (auto it = enemies.begin(); it != enemies.end(); it++)
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
-          it->Stun(2000);
+          it->Stun(1500);
       lastMeteor = GetTickCount();
       return true;
     }
@@ -451,7 +454,7 @@ public:
         base->Move(base->speed, 0);
       movedDistance += base->speed;
       for (auto it = enemies.begin(); it != enemies.end(); it++)
-        if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
+        if (it->CheckCollision(base.get()))
           it->DamageHim(GetDamage());
     }
     return true;
@@ -548,7 +551,7 @@ class TwoLightAndOneFireMeteor : public Meteor {
   int countOfMeteors;
   DWORD lastMeteor;
 public:
-  TwoLightAndOneFireMeteor() { waitingNew = true; movedDistance[0] = movedDistance[1] = movedDistance[2] = 0; lastMeteor = 0; countOfMeteors = 0; createdNew = falled[0] = falled[1] = falled[2] = false;}
+  TwoLightAndOneFireMeteor() { waitingNew = true; movedDistance[0] = movedDistance[1] = movedDistance[2] = 0; lastMeteor = 0; countOfMeteors = 0; createdNew = falled[0] = falled[1] = falled[2] = false; }
 
   virtual bool operation() override {
     // Если нужен новый метеорит - создать его
@@ -591,7 +594,11 @@ public:
       }
     }
     // Скилл заканчивается, когда все метеориты запущены, и все метеориты пролетели уже
-    return !(movedDistance[0] > 300 && movedDistance[1] > 300 && movedDistance[2] > 300);
+    if (!(movedDistance[0] > 300 && movedDistance[1] > 300 && movedDistance[2] > 300)) {
+      waitingNew = true; movedDistance[0] = movedDistance[1] = movedDistance[2] = 0; lastMeteor = 0; countOfMeteors = 0; createdNew = falled[0] = falled[1] = falled[2] = false;
+      return false;
+    }
+    return true;
   }
 };
 
@@ -655,6 +662,7 @@ public:
       if (base->operation())
         return true;
       FireTime = true;
+      lastFire = base->GetX();
     }
     if (!fireImage.IsValid()) {
       fireImage.LoadFromFile("img\\fire.png");
@@ -666,7 +674,12 @@ public:
       return false;
     }
     window.Draw(base.get());
-    if (base->GetX() - lastFire > fireSprite.GetWidth()) {
+    if (base->GetX() - lastFire > fireSprite.GetWidth() && !base->IsFlippedX()) {
+      lastFire = base->GetX();
+      fireSprite.SetX(lastFire);
+      effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
+    }
+    else if (lastFire - base->GetX() > fireSprite.GetWidth() && base->IsFlippedX()) {
       lastFire = base->GetX();
       fireSprite.SetX(lastFire);
       effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
@@ -677,7 +690,7 @@ public:
       base->Move(base->speed, 0);
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
+      if (it->CheckCollision(base.get()))
         it->DamageHim(GetDamage());
     return true;
   }
@@ -705,7 +718,7 @@ public:
     if (!FireTime) {
       if (base->operation())
         return true;
-      int left = GetX() - GetRange();
+      int left = base->GetX() - base->GetRange();
       int right = base->GetX() + base->GetWidth() + base->GetRange();
       for (auto it = enemies.begin(); it != enemies.end(); it++)
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
@@ -722,7 +735,12 @@ public:
       return false;
     }
     window.Draw(base.get());
-    if (base->GetX() - lastFire > fireSprite.GetWidth()) {
+    if (base->GetX() - lastFire > fireSprite.GetWidth() && !base->IsFlippedX()) {
+      lastFire = base->GetX();
+      fireSprite.SetX(lastFire);
+      effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
+    }
+    else if (lastFire - base->GetX() > fireSprite.GetWidth() && base->IsFlippedX()) {
       lastFire = base->GetX();
       fireSprite.SetX(lastFire);
       effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
@@ -733,7 +751,7 @@ public:
       base->Move(base->speed, 0);
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
+      if (it->CheckCollision(base.get()))
         it->DamageHim(GetDamage());
     return true;
   }
@@ -759,7 +777,7 @@ public:
     if (!FireTime) {
       if (base->operation())
         return true;
-      int left = GetX() - GetRange();
+      int left = base->GetX() - base->GetRange();
       int right = base->GetX() + base->GetWidth() + base->GetRange();
       for (auto it = enemies.begin(); it != enemies.end(); it++)
         if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
@@ -776,7 +794,12 @@ public:
       return false;
     }
     window.Draw(base.get());
-    if (base->GetX() - lastFire > fireSprite.GetWidth()) {
+    if (base->GetX() - lastFire > fireSprite.GetWidth() && !base->IsFlippedX()) {
+      lastFire = base->GetX();
+      fireSprite.SetX(lastFire);
+      effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
+    }
+    else if (lastFire - base->GetX() > fireSprite.GetWidth() && base->IsFlippedX()) {
       lastFire = base->GetX();
       fireSprite.SetX(lastFire);
       effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
@@ -787,7 +810,7 @@ public:
       base->Move(base->speed, 0);
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
-      if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
+      if (it->CheckCollision(base.get()))
         it->DamageHim(GetDamage());
     return true;
   }
@@ -886,10 +909,16 @@ public:
   virtual bool operation() override {
     // Если нужно создать новый метеорит - создаем его
     if (GetTickCount() - lastMeteor > 250 && countOfMeteors < 15) {
-      double angle = ((rand()%30+30)*3.14)/180;
-      meteors[countOfMeteors].Cast(player);
+      double angle = (70*3.14)/180;
+      if (!meteors[countOfMeteors].imageLoaded) meteors[countOfMeteors].LoadImage();
+      meteors[countOfMeteors].destination = RIGHT;
+      meteors[countOfMeteors].SetX(player.GetX() + rand()%600 - 300);
+      meteors[countOfMeteors].SetY(player.GetY() + 200);
+      meteors[countOfMeteors].casting = true;
+      meteors[countOfMeteors].isDrawing = true;
       meteors[countOfMeteors].speedX = meteors[countOfMeteors].speed * cos(angle);
       meteors[countOfMeteors].speedY = meteors[countOfMeteors].speed * sin(angle);
+
       countOfMeteors++;
       lastMeteor = GetTickCount();
     }
@@ -902,7 +931,7 @@ public:
       for (auto i = floors.begin(); i != floors.end(); i++) {
         if ((*i)->CheckCollision(meteor)) {
           int left = meteor->GetX() - meteor->GetRange();
-          int right = meteor->GetX() +meteor-> GetWidth() + meteor->GetRange();
+          int right = meteor->GetX() + meteor->GetWidth() + meteor->GetRange();
           for (auto it = enemies.begin(); it != enemies.end(); it++)
             if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
               it->DamageHim(GetDamage());
@@ -960,7 +989,7 @@ public:
         if (GetTickCount() - secondRemaining > 1000) {
           secondRemaining = GetTickCount();
           for (auto i = enemies.begin(); i != enemies.end(); i++)
-            if (i->CheckCollision(base.get())) {
+            if (i->CheckCollision(&iceSphereSprite)) {
               i->DamageHim(15);
               i->Freeze(5000);
             }
@@ -974,7 +1003,7 @@ public:
   }
 
   se::Image iceSphereImage;
-  se::Sprite iceSphereSprite;
+  Entity iceSphereSprite;
   DWORD fallingTime;
   DWORD secondRemaining;
   bool sphereTime;
