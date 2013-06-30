@@ -17,7 +17,6 @@ bool castingSkill = false;
 KeySphere currentSphere;
 se::Sprite stair(880, window.GetHeight()/4);
 se::Image stairImage;
-se::Sprite health(0, window.GetHeight()-10, player.GetHealth(), 10, se::Color(0.8f, 0.2f, 0.2f), true);
 int stairHeight;
 int angles[3];
 se::Sprite clouds[30];
@@ -84,6 +83,27 @@ void DeinitArena() {
   damageString.clear();
   for (auto i = floors.begin(); i != floors.end(); i++)
     delete *i;
+}
+
+void DrawHealth() {
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glTranslatef(0.0f, window.GetHeight(), 0.0f);
+  glColor3f(1.0f, 0.0f, 0.0f);
+  glPointSize(10);
+  glDisable(GL_TEXTURE_2D);
+  glEnable(GL_POINT_SMOOTH);
+  glBegin(GL_POINTS);
+  // 80 точек
+  // здоровье = 100 поинтов
+  // одна точка = 100/80 = 1,25 поинтов
+  // кол-во точек = здоровье/1.25, если здоровье = 100, то точек = 80
+  for (int i = 0; i < (int)player.GetHealth()/1.25; i++) {
+    glVertex2f(190*cos((275+i)*3.14/180), 190*sin((275+i)*3.14/180));
+  }
+  glEnd();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
 }
 
 void DrawArena() {
@@ -170,7 +190,6 @@ void DrawArena() {
   }
   
   player.Tick(floors);
-  health.SetWidth(player.GetHealth()*2);
 
   damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime<se::String> t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
   effects.erase(std::remove_if(effects.begin(), effects.end(), [](DrawSomeTime<Entity> t) { return GetTickCount() - t.firstTime > t.time; }), effects.end());
@@ -196,6 +215,9 @@ void DrawArena() {
   // Drawing interface
   window.Draw(&interfaceS);
 
+  // Drawing healthbar
+  DrawHealth();
+
   // Drawing floor
   for (auto i = floors.begin(); i != floors.end(); i++)
     window.Draw(*i);
@@ -219,7 +241,7 @@ void DrawArena() {
   for (int i = 0; i < currentSphere.GetCount(); i++) {
     spheres[i].SetX(57+45*cos(angles[i]*3.14/180));
     spheres[i].SetY(window.GetHeight()-95+45*sin(angles[i]*3.14/180));
-    angles[i]+=3;
+    angles[i]-=2;
     window.Draw(&spheres[i]);
   }
 
