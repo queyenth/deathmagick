@@ -67,11 +67,11 @@ void DrawSkills() {
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
           if (imprs[currentSkill].k1 <= j && i == 0)
-            spheresForMenu[0][j].SetColor(se::Color(0.1f, 0.1f, 0.1f, 1.0f));
+            spheresForMenu[0][j].SetColor(se::Color(0.5f, 0.5f, 0.5f, 0.5f));
           if (imprs[currentSkill].k2 <= j && i == 1)
-            spheresForMenu[1][j].SetColor(se::Color(0.1f, 0.1f, 0.1f, 1.0f));
+            spheresForMenu[1][j].SetColor(se::Color(0.5f, 0.5f, 0.5f, 0.5f));
           if (imprs[currentSkill].k3 <= j && i == 2)
-            spheresForMenu[2][j].SetColor(se::Color(0.1f, 0.1f, 0.1f, 1.0f));
+            spheresForMenu[2][j].SetColor(se::Color(0.5f, 0.5f, 0.5f, 0.5f));
         }
       }
     }

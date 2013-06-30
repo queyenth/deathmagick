@@ -19,10 +19,13 @@ se::Sprite stair(880, window.GetHeight()/4);
 se::Image stairImage;
 se::Sprite health(0, window.GetHeight()-10, player.GetHealth(), 10, se::Color(0.8f, 0.2f, 0.2f), true);
 int stairHeight;
+int angles[3];
 se::Sprite clouds[30];
 se::Image cloudImage;
 std::vector<std::shared_ptr<Skill>> skillsOnFrame;
 bool moved = false;
+se::Image interfaceImg;
+se::Sprite interfaceS;
 
 void InitStairs() {
   //stairImage.LoadFromFile("img\\stair.png");
@@ -40,6 +43,10 @@ void InitBackgrounds() {
     clouds[i].SetY(rand()%window.GetHeight());
     clouds[i].SetFixedMode(true);
   }
+  interfaceImg.LoadFromFile("img\\interface.png");
+  interfaceS = se::Sprite(0, window.GetHeight()-200);
+  interfaceS.SetImage(interfaceImg);
+  interfaceS.SetFixedMode(true);
 }
 
 void InitSpheres() {
@@ -51,6 +58,7 @@ void InitSpheres() {
   sphereImages[1].LoadFromFile("img\\l1.png");
   sphereImages[2].LoadFromFile("img\\m1.png");
   k1p = k2p = k3p = false;
+  angles[0] = angles[1] = angles[2] = 0;
 }
 
 void InitImprs() {
@@ -139,11 +147,11 @@ void DrawArena() {
     camera.OffsetViewByX(player.GetX() - middle);
     if (destination == LEFT) {
       for (int i = 0; i < 30; i++)
-        clouds[i].SetX(clouds[i].GetX()+1);
+        clouds[i].Move(1, 0);
     }
     else {
       for (int i = 0; i < 30; i++)
-        clouds[i].SetX(clouds[i].GetX()-1);
+        clouds[i].Move(-1, 0);
     }
     
     moved = false;
@@ -155,7 +163,10 @@ void DrawArena() {
   if (castType != 0) {
     int count = currentSphere.GetCount()-1;
     spheres[count].SetImage(sphereImages[castType-1]);
-    spheres[count].SetX(50*count);
+    if (count == 0)
+      angles[0] = 0;
+    else
+      angles[count] = angles[count-1]+120;
   }
   
   player.Tick(floors);
@@ -182,6 +193,9 @@ void DrawArena() {
   for (int i = 0; i < 30; i++)
     window.Draw(&clouds[i]);
 
+  // Drawing interface
+  window.Draw(&interfaceS);
+
   // Drawing floor
   for (auto i = floors.begin(); i != floors.end(); i++)
     window.Draw(*i);
@@ -202,11 +216,12 @@ void DrawArena() {
   }
     
   // Drawing spheres
-  for (int i = 0; i < currentSphere.GetCount(); i++)
+  for (int i = 0; i < currentSphere.GetCount(); i++) {
+    spheres[i].SetX(57+45*cos(angles[i]*3.14/180));
+    spheres[i].SetY(window.GetHeight()-95+45*sin(angles[i]*3.14/180));
+    angles[i]+=3;
     window.Draw(&spheres[i]);
-    
-  // Drawing health bar
-  window.Draw(&health);
+  }
 
   // Drawing skill
   if (castingSkill) {
