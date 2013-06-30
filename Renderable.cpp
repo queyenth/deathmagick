@@ -166,10 +166,20 @@ void Renderable::Draw(Camera &camera) const {
 
   // Если положение объекта изменилось, или изменилась камера, МОДИФИЦИРУЕМ МАТРИЦУ FUCK YEAH
   if (camera.Changed() || positionChanged) {
-    int newX = isFixed ? x : x - camera.GetViewX();
-    int newY = isFixed ? y : y - camera.GetViewY();
+    int newX = isFixed ? x+width/2 : x+width/2 - camera.GetViewX();
+    int newY = isFixed ? y+height/2 : y+height/2 - camera.GetViewY();
+    // Сразу вычисляем косинус и синус, ибо дорогостоящая операция
+    float Cos = cosf(angle*(float)(3.14159265/180));
+    float Sin = sinf(angle*(float)(3.14159265/180));
+
+    // Обновляем матрицу
+    matrix.Set(0, Cos);
+    matrix.Set(1, Sin);
+    matrix.Set(4, -Sin);
+    matrix.Set(5, Cos);
     matrix.Set(12, newX);
     matrix.Set(13, newY);
+    
     positionChanged = false;
   }
 
@@ -199,21 +209,10 @@ void Renderable::Draw(Camera &camera) const {
  * @param newAngle : угол поворота
  */
 void Renderable::Rotate(float newAngle) {
-
   angle += newAngle;
   angle = fmod(angle, 360);
   while (angle < 0) angle += 360;
-
-  // Сразу вычисляем косинус и синус, ибо дорогостоящая операция
-  float Cos = cosf(angle*(float)(3.14159265/180));
-  float Sin = sinf(angle*(float)(3.14159265/180));
-
-  // Обновляем матрицу
-  matrix.Set(0, Cos);
-  matrix.Set(1, Sin);
-  matrix.Set(4, -Sin);
-  matrix.Set(5, Cos);
-
+  positionChanged = true;
 }
 /**
  * @brief Изменяет текущий угол поворота

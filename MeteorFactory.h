@@ -61,10 +61,14 @@ public:
       return false;
     }
     window.Draw(base.get());
-    if (base->destination == LEFT)
+    if (base->destination == LEFT) {
+      base->Rotate(8);
       base->Move(-base->speed, 0);
-    else
+    }
+    else {
+      base->Rotate(-8);
       base->Move(base->speed, 0);
+    }
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (it->CheckCollision(base.get()))
@@ -136,10 +140,14 @@ public:
       return false;
     }
     window.Draw(base.get());
-    if (base->destination == LEFT)
+    if (base->destination == LEFT) {
+      base->Rotate(8);
       base->Move(-base->speed, 0);
-    else
+    }
+    else {
+      base->Rotate(-8);
       base->Move(base->speed, 0);
+    }
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (it->CheckCollision(base.get()))
@@ -212,10 +220,14 @@ public:
       return false;
     }
     window.Draw(base.get());
-    if (base->destination == LEFT)
+    if (base->destination == LEFT) {
+      base->Rotate(8);
       base->Move(-base->speed, 0);
-    else
+    }
+    else {
+      base->Rotate(-8);
       base->Move(base->speed, 0);
+    }
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (it->CheckCollision(base.get()))
@@ -285,10 +297,14 @@ public:
       return false;
     }
     window.Draw(base.get());
-    if (base->destination == LEFT)
+    if (base->destination == LEFT) {
+      base->Rotate(8);
       base->Move(-base->speed, 0);
-    else
+    }
+    else {
+      base->Rotate(-8);
       base->Move(base->speed, 0);
+    }
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (it->CheckCollision(base.get()))
@@ -448,10 +464,14 @@ public:
     if (movedDistance > 300) return false;
     else {
       window.Draw(base.get());
-      if (base->destination == LEFT)
-        base->Move(-base->speed, 0);
-      else
-        base->Move(base->speed, 0);
+      if (base->destination == LEFT) {
+      base->Rotate(8);
+      base->Move(-base->speed, 0);
+    }
+    else {
+      base->Rotate(-8);
+      base->Move(base->speed, 0);
+    }
       movedDistance += base->speed;
       for (auto it = enemies.begin(); it != enemies.end(); it++)
         if (it->CheckCollision(base.get()))
@@ -568,7 +588,7 @@ public:
       meteor->speed = 8;
       // Если долетел до земли - станим всех вокруг
       if (!meteor->operation()) {
-        int left = GetX() - GetRange();
+        int left = meteor->GetX() - meteor->GetRange();
         int right = meteor->GetX() + meteor->GetWidth() + meteor->GetRange();
         for (auto it = enemies.begin(); it != enemies.end(); it++)
           if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
@@ -577,16 +597,21 @@ public:
         lastMeteor = GetTickCount();
         countOfMeteors++;
         waitingNew = true;
+        createdNew = false;
       }
     }
     // Тем временем, нужно каждый упавший метеорит пускаааать по земле
     for (int i = 0; i < 3; i++) {
       if (movedDistance[i] <= 300 && falled[i]) {
         window.Draw(&meteors[i]);
-        if (meteors[i].destination == LEFT)
+        if (meteors[i].destination == LEFT) {
+          meteors[i].Rotate(8);
           meteors[i].Move(-meteors[i].speed, 0);
-        else
+        }
+        else {
+          meteors[i].Rotate(-8);
           meteors[i].Move(meteors[i].speed, 0);
+        }
         movedDistance[i] += meteors[i].speed;
         for (auto it = enemies.begin(); it != enemies.end(); it++)
           if (it->CheckCollision(&meteors[i]) && !it->damage.UnderEffect())
@@ -594,7 +619,7 @@ public:
       }
     }
     // Скилл заканчивается, когда все метеориты запущены, и все метеориты пролетели уже
-    if (!(movedDistance[0] > 300 && movedDistance[1] > 300 && movedDistance[2] > 300)) {
+    if (movedDistance[0] > 300 && movedDistance[1] > 300 && movedDistance[2] > 300) {
       waitingNew = true; movedDistance[0] = movedDistance[1] = movedDistance[2] = 0; lastMeteor = 0; countOfMeteors = 0; createdNew = falled[0] = falled[1] = falled[2] = false;
       return false;
     }
@@ -746,10 +771,14 @@ public:
       fireSprite.SetX(lastFire);
       effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
     }
-    if (base->destination == LEFT)
+    if (base->destination == LEFT) {
+      base->Rotate(8);
       base->Move(-base->speed, 0);
-    else
+    }
+    else {
+      base->Rotate(-8);
       base->Move(base->speed, 0);
+    }
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (it->CheckCollision(base.get()))
@@ -806,10 +835,14 @@ public:
       fireSprite.SetX(lastFire);
       effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
     }
-    if (base->destination == LEFT)
+    if (base->destination == LEFT) {
+      base->Rotate(8);
       base->Move(-base->speed, 0);
-    else
+    }
+    else {
+      base->Rotate(-8);
       base->Move(base->speed, 0);
+    }
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (it->CheckCollision(base.get()))
@@ -883,10 +916,14 @@ public:
       fireSprite.SetX(lastFire);
       effects.push_back(DrawSomeTime<Entity>(std::shared_ptr<Entity>(new Entity(fireSprite)), 3000));
     }
-    if (base->destination == LEFT)
+    if (base->destination == LEFT) {
+      base->Rotate(8);
       base->Move(-base->speed, 0);
-    else
+    }
+    else {
+      base->Rotate(-8);
       base->Move(base->speed, 0);
+    }
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
       if (it->CheckCollision(base.get()) && !it->damage.UnderEffect())
