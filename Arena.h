@@ -98,7 +98,8 @@ void DrawHealth() {
   // здоровье = 100 поинтов
   // одна точка = 100/80 = 1,25 поинтов
   // кол-во точек = здоровье/1.25, если здоровье = 100, то точек = 80
-  for (int i = 0; i < (int)player.GetHealth()/1.25; i++) {
+  int points = (int)player.GetHealth()/1.25;
+  for (int i = 0; i < points; i++) {
     glVertex2f(190*cos((275+i)*3.14/180), 190*sin((275+i)*3.14/180));
   }
   glEnd();

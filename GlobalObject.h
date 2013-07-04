@@ -8,7 +8,9 @@
 #include "Enemy.h"
 #include "Impr.h"
 
-enum GameState { MENU_INIT, MENU, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT };
+enum GameState {
+	MENU_INIT, MENU, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT
+};
 GameState currentState = MENU_INIT;
 
 #ifdef _DEBUG
@@ -27,7 +29,7 @@ se::Image backimage;
 se::Image sphereImages[3];
 std::vector<PhysicsObject *> floors;
 Player player;
-vector<Enemy> enemies;
+std::vector<Enemy> enemies;
 std::vector<DrawSomeTime<se::String>> damageString;
 std::vector<DrawSomeTime<Entity>> effects;
 se::Sprite arrow;

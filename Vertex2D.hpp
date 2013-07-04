@@ -30,7 +30,7 @@ public:
    * @param x : координата по X (по умолчанию 0)
    * @param y : координата по Y (по умолчанию 0)
    */
-  Vertex2D(unsigned int x=0, unsigned int y=0) : x(x), y(y) {
+  Vertex2D(int x=0, int y=0) : x(x), y(y) {
 
   }
 
@@ -42,9 +42,9 @@ public:
   }
 
   /// Координата по X
-  unsigned int x;
+  int x;
   /// Координата по Y
-  unsigned int y;
+  int y;
 };
 
 typedef Vertex2D Point2D;
