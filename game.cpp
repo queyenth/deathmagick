@@ -12,8 +12,10 @@
 #include <ctime>
 
 int main() {
+  #ifdef _DEBUG
   _CrtMemState _ms;
   _CrtMemCheckpoint(&_ms);
+  #endif
 
   srand(time(NULL));
   
@@ -64,6 +66,9 @@ int main() {
 
   DeinitArena();
   delete font;
+  delete menuFont;
+  #ifdef _DEBUG
   _CrtMemDumpAllObjectsSince(&_ms);
+  #endif
   return 0;
 }

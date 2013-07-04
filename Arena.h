@@ -17,12 +17,14 @@ bool castingSkill = false;
 KeySphere currentSphere;
 se::Sprite stair(880, window.GetHeight()/4);
 se::Image stairImage;
-se::Sprite health(0, window.GetHeight()-10, player.GetHealth(), 10, se::Color(0.8f, 0.2f, 0.2f), true);
 int stairHeight;
+int angles[3];
 se::Sprite clouds[30];
 se::Image cloudImage;
 std::vector<std::shared_ptr<Skill>> skillsOnFrame;
 bool moved = false;
+se::Image interfaceImg;
+se::Sprite interfaceS;
 
 void InitStairs() {
   //stairImage.LoadFromFile("img\\stair.png");
@@ -40,6 +42,10 @@ void InitBackgrounds() {
     clouds[i].SetY(rand()%window.GetHeight());
     clouds[i].SetFixedMode(true);
   }
+  interfaceImg.LoadFromFile("img\\interface.png");
+  interfaceS = se::Sprite(0, window.GetHeight()-200);
+  interfaceS.SetImage(interfaceImg);
+  interfaceS.SetFixedMode(true);
 }
 
 void InitSpheres() {
@@ -51,6 +57,7 @@ void InitSpheres() {
   sphereImages[1].LoadFromFile("img\\l1.png");
   sphereImages[2].LoadFromFile("img\\m1.png");
   k1p = k2p = k3p = false;
+  angles[0] = angles[1] = angles[2] = 0;
 }
 
 void InitImprs() {
@@ -76,6 +83,28 @@ void DeinitArena() {
   damageString.clear();
   for (auto i = floors.begin(); i != floors.end(); i++)
     delete *i;
+}
+
+void DrawHealth() {
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glTranslatef(0.0f, window.GetHeight(), 0.0f);
+  glColor3f(1.0f, 0.0f, 0.0f);
+  glPointSize(10);
+  glDisable(GL_TEXTURE_2D);
+  glEnable(GL_POINT_SMOOTH);
+  glBegin(GL_POINTS);
+  // 80 точек
+  // здоровье = 100 поинтов
+  // одна точка = 100/80 = 1,25 поинтов
+  // кол-во точек = здоровье/1.25, если здоровье = 100, то точек = 80
+  int points = (int)player.GetHealth()/1.25;
+  for (int i = 0; i < points; i++) {
+    glVertex2f(190*cos((275+i)*3.14/180), 190*sin((275+i)*3.14/180));
+  }
+  glEnd();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
 }
 
 void DrawArena() {
@@ -139,11 +168,11 @@ void DrawArena() {
     camera.OffsetViewByX(player.GetX() - middle);
     if (destination == LEFT) {
       for (int i = 0; i < 30; i++)
-        clouds[i].SetX(clouds[i].GetX()+1);
+        clouds[i].Move(1, 0);
     }
     else {
       for (int i = 0; i < 30; i++)
-        clouds[i].SetX(clouds[i].GetX()-1);
+        clouds[i].Move(-1, 0);
     }
     
     moved = false;
@@ -155,11 +184,13 @@ void DrawArena() {
   if (castType != 0) {
     int count = currentSphere.GetCount()-1;
     spheres[count].SetImage(sphereImages[castType-1]);
-    spheres[count].SetX(50*count);
+    if (count == 0)
+      angles[0] = 0;
+    else
+      angles[count] = angles[count-1]+120;
   }
   
   player.Tick(floors);
-  health.SetWidth(player.GetHealth()*2);
 
   damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime<se::String> t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
   effects.erase(std::remove_if(effects.begin(), effects.end(), [](DrawSomeTime<Entity> t) { return GetTickCount() - t.firstTime > t.time; }), effects.end());
@@ -182,6 +213,12 @@ void DrawArena() {
   for (int i = 0; i < 30; i++)
     window.Draw(&clouds[i]);
 
+  // Drawing interface
+  window.Draw(&interfaceS);
+
+  // Drawing healthbar
+  DrawHealth();
+
   // Drawing floor
   for (auto i = floors.begin(); i != floors.end(); i++)
     window.Draw(*i);
@@ -202,11 +239,12 @@ void DrawArena() {
   }
     
   // Drawing spheres
-  for (int i = 0; i < currentSphere.GetCount(); i++)
+  for (int i = 0; i < currentSphere.GetCount(); i++) {
+    spheres[i].SetX(57+45*cos(angles[i]*3.14/180));
+    spheres[i].SetY(window.GetHeight()-95+45*sin(angles[i]*3.14/180));
+    angles[i]-=2;
     window.Draw(&spheres[i]);
-    
-  // Drawing health bar
-  window.Draw(&health);
+  }
 
   // Drawing skill
   if (castingSkill) {

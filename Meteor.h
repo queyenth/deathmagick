@@ -4,8 +4,9 @@
 
 class Meteor : public Skill {
 public:
-  Meteor() : Skill(0, 0, 50, 100), speed(5) {
+  Meteor() : Skill(0, 0, 50, 100) {
     imageLoaded = false;
+    speed = 5;
   }
 
   virtual ~Meteor() {
@@ -29,6 +30,5 @@ public:
   }
 
   bool imageLoaded;
-  int speed;
   bool isDrawing;
 };
