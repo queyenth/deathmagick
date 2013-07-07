@@ -22,8 +22,8 @@ public:
     if (waveTime) {
       if (waveTimes == 25) {
         waveTimes = 0;
-        int left = waveSprite.GetX();
-        int right = waveSprite.GetX()+waveSprite.GetWidth();
+        int left = waveSprite.GetX()+10;
+        int right = waveSprite.GetX()+waveSprite.GetWidth()-10;
         for (auto it = enemies.begin(); it != enemies.end(); it++)
           if (left <= it->GetX() && it->GetX()+it->GetWidth() <= right)
             it->DamageHim(200);
@@ -34,12 +34,12 @@ public:
       waveSprite.SetX(fire->base->base->GetX()-waveSprite.GetWidth()/2);
       waveTimes++;
       window.Draw(&waveSprite);
-      return true;
     }
     if (!fire->operation()) {
       waveTime = true;
       waveSprite.SetY(fire->base->base->GetY());
     }
+    return true;
   }
 
   bool waveTime;

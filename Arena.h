@@ -61,9 +61,10 @@ void InitSpheres() {
 }
 
 void InitImprs() {
-  FILE *file = fopen("test.txt", "r");
+  FILE *file;
+  fopen_s(&file, "test.txt", "r");
   int k1,k2,k3;
-  fscanf(file, "%d %d %d", &k1, &k2, &k3);
+  fscanf_s(file, "%d %d %d", &k1, &k2, &k3);
   fclose(file);
   imprs.push_back(tagIMPR(k1, k2, k3));
 }
@@ -81,16 +82,18 @@ void InitArena() {
 void DeinitArena() {
   enemies.clear();
   damageString.clear();
+  skillsOnFrame.clear();
   for (auto i = floors.begin(); i != floors.end(); i++)
     delete *i;
+  floors.clear();
 }
 
 void DrawHealth() {
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
-  glTranslatef(0.0f, window.GetHeight(), 0.0f);
+  glTranslatef(0.0f, (float)window.GetHeight(), 0.0f);
   glColor3f(1.0f, 0.0f, 0.0f);
-  glPointSize(10);
+  glPointSize(15);
   glDisable(GL_TEXTURE_2D);
   glEnable(GL_POINT_SMOOTH);
   glBegin(GL_POINTS);
@@ -98,9 +101,9 @@ void DrawHealth() {
   // здоровье = 100 поинтов
   // одна точка = 100/80 = 1,25 поинтов
   // кол-во точек = здоровье/1.25, если здоровье = 100, то точек = 80
-  int points = (int)player.GetHealth()/1.25;
+  int points = player.GetHealth()/1.25;
   for (int i = 0; i < points; i++) {
-    glVertex2f(190*cos((275+i)*3.14/180), 190*sin((275+i)*3.14/180));
+    glVertex2f(190*cosf((275+i)*3.14/180), 190*sinf((275+i)*3.14/180));
   }
   glEnd();
   glMatrixMode(GL_MODELVIEW);

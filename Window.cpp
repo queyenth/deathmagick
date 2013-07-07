@@ -1,20 +1,3 @@
-/**
- * SimpleEngine.
- * Copyright (C) 2013 oveRan
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 #include "Window.hpp"
 
 namespace se {
@@ -50,6 +33,12 @@ Window::~Window() {
   KillWindow();
 }
 
+Window::Window() : bits(32), fullscreen(false), nameOfWindow(L"Undef") {
+  hWnd = NULL;
+  isActive = true;
+  isOpened = true;
+}
+
 /**
  * @brief Конструктор
  *
@@ -60,7 +49,6 @@ Window::~Window() {
  */
 Window::Window(wstring name, int width, int height, bool fullscreen, int bits) : camera(0, 0) {
   hWnd = NULL;
-  hInstance = GetModuleHandle(NULL);
   this->width = width;
   this->height = height;
   this->bits = bits;
@@ -75,7 +63,8 @@ Window::Window(wstring name, int width, int height, bool fullscreen, int bits) :
  * @brief Метод, который создает окно, и устанавливает на него фокус
  */
 void Window::CreateUserWindow() {
-  WNDCLASSEX wc;
+  hInstance = GetModuleHandle(NULL);
+  WNDCLASS wc;
   wc.cbClsExtra = 0;
   wc.cbWndExtra = 0;
   wc.hCursor = LoadCursor(NULL, IDC_ARROW);
@@ -86,10 +75,8 @@ void Window::CreateUserWindow() {
   wc.lpszClassName = nameOfWindow.c_str();
   wc.lpszMenuName = NULL;
   wc.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
-  wc.cbSize = sizeof(wc);
-  wc.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
   
-  if (!RegisterClassEx(&wc)) {
+  if (!RegisterClass(&wc)) {
     MessageBox(NULL, L"Failed To Register A Window Class.", nameOfWindow.c_str(), MB_OK | MB_ICONEXCLAMATION);
     exit(1);
   }
@@ -364,7 +351,7 @@ void Window::Clear(Color color) {
  *
  * @return ссылку на Input
  */
-const Input& Window::GetInput() {
+Input& Window::GetInput() {
   return input;
 }
 
@@ -387,6 +374,18 @@ int Window::GetWidth() const {
  */
 int Window::GetHeight() const {
 	return height;
+}
+
+void Window::SetWidth(int width) {
+  this->width = width;
+}
+
+void Window::SetHeight(int height) {
+  this->height = height;
+}
+
+void Window::SetFullscreen(bool fullscreen) {
+  this->fullscreen = fullscreen;
 }
 
 /**
