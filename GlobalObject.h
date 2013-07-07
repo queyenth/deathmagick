@@ -9,22 +9,18 @@
 #include "Impr.h"
 
 enum GameState {
-	MENU_INIT, MENU, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT
+	MENU_INIT, MENU, SETTINGS, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT
 };
 GameState currentState = MENU_INIT;
 
-#ifdef _DEBUG
-se::Window window(L"Untitled Game[DEBUG]", 1024, 768, false);
-#else
-se::Window window(L"Untitled Game", 1920, 1080, true);
-#endif
+se::Window window;
 
-const se::Input &input = window.GetInput();
+se::Input &input = window.GetInput();
 se::Camera &camera = window.GetCamera();
 se::Font *font;
 se::Font *menuFont;
 std::vector<tagIMPR> imprs;
-se::Sprite backMenu = se::Sprite(0, 0, window.GetWidth(), window.GetHeight());
+se::Sprite backMenu;
 se::Image backimage;
 se::Image sphereImages[3];
 std::vector<PhysicsObject *> floors;

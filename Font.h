@@ -7,7 +7,7 @@
 namespace se {
 class Font {
 public:
-  enum { CountOfCharset = 96 };
+  enum { CountOfCharset = 256 };
   Font() {
     base = 0;
     size = 24;
@@ -41,7 +41,7 @@ public:
       ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY,
       FF_DONTCARE | DEFAULT_PITCH, fontName.c_str());
     oldfont = (HFONT)SelectObject(hDC, font);
-    wglUseFontBitmaps(hDC, 32, CountOfCharset, base);
+    wglUseFontBitmaps(hDC, 0, CountOfCharset, base);
     SelectObject(hDC, oldfont);
     DeleteObject(font);
 }

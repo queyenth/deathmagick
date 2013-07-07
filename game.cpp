@@ -8,6 +8,7 @@
 #include "Menu.h"
 #include "GameMenu.h"
 #include "SkillsMenu.h"
+#include "SettingsMenu.h"
 
 #include <ctime>
 
@@ -18,6 +19,46 @@ int main() {
   #endif
 
   srand(time(NULL));
+
+  int currentSet;
+  int fullscreen;
+  FILE *settingsFile;
+  fopen_s(&settingsFile, "config", "r");
+  fscanf_s(settingsFile, "%d %d", &currentSet, &fullscreen);
+  fclose(settingsFile);
+
+  switch (currentSet) {
+  case 0:
+    window.SetWidth(640);
+    window.SetHeight(480);
+    break;
+  case 1:
+    window.SetWidth(800);
+    window.SetHeight(600);
+    break;
+  case 2:
+    window.SetWidth(1024);
+    window.SetHeight(768);
+    break;
+  case 3:
+    window.SetWidth(1280);
+    window.SetHeight(1024);
+    break;
+  case 4:
+    window.SetWidth(1440);
+    window.SetHeight(900);
+    break;
+  case 5:
+    window.SetWidth(1920);
+    window.SetHeight(1080);
+    break;
+  }
+
+  if (fullscreen) window.SetFullscreen(true);
+  window.CreateUserWindow();
+
+  currentResolution = currentSet;
+  fullscreenF = fullscreen;
   
   // FIXME: Improve gameloop :3
   while (window.IsOpened()) {
@@ -32,9 +73,12 @@ int main() {
     case MENU:
       DrawMenu();
       break;
+    case SETTINGS:
+      DrawSettingsMenu();
+      break;
     case MENU_INIT:
-      font = new se::Font(window.GetDC(), L"Courier New", 18);
-      menuFont = new se::Font(window.GetDC(), L"Arial", 28);
+      font = new se::Font(window.GetDC(), L"Arial Cyr", 18);
+      menuFont = new se::Font(window.GetDC(), L"Arial Cyr", 28);
       backimage.LoadFromFile("img\\back.png");
       backMenu.SetImage(backimage);
       InitMenuImages();

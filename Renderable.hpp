@@ -176,6 +176,12 @@ protected:
   /// Y координата
   int y;
 
+  /// Ширина объекта
+  int width;
+
+  /// Высота объекта
+  int height;
+
 private:
   /**
    * @brief Метод, который должны реализовать все потомки
@@ -188,12 +194,6 @@ private:
    * @brief Инициализирует textureRect
    */
   void InitTextureRect();
-
-  /// Ширина объекта
-  int width;
-
-  /// Высота объекта
-  int height;
 
   /// Цвет объекта
   Color color;

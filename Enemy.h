@@ -1,6 +1,12 @@
 #pragma once
 
-#include "GlobalObject.h"
+#include "Font.h"
+#include "DrawSomeTime.h"
+#include "String.hpp"
+#include "Entity.h"
+#include "Window.hpp"
+
+#include <vector>
 
 extern std::vector<DrawSomeTime<se::String>> damageString;
 extern se::Font *font;
@@ -25,8 +31,8 @@ public:
       health = 0;
 	  else
 	    health -= damageSize;
-    wchar_t text[5];
-    wsprintf(text, L"%d", damageSize);
+    char text[5];
+    sprintf_s(text, 5, "%d", damageSize);
     damageString.push_back(DrawSomeTime<se::String>(std::shared_ptr<se::String>(new se::String(text, font, x+GetWidth(), y+GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
     damage.SetLong(500);
     damage.MakeEffect();

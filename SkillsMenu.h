@@ -58,7 +58,7 @@ void DrawSkills() {
   case 0:
     skill = SkillFactory::MakeSkill(KeySphere(2, 1, 0), imprs[currentSkill]).get();
     nameOfSkill = "Meteorit";
-    name.SetText(std::wstring(nameOfSkill.begin(), nameOfSkill.end()));
+    name.SetText(nameOfSkill);
     if (!skillImage.IsValid()) {
       skillImage.LoadFromFile("img\\meteor.png");
       skillSprite.SetImage(skillImage);
@@ -101,7 +101,7 @@ void DrawSkills() {
        // If mouse on hover on sphere, render the description
       if ((sphere->GetX() <= mx && mx <= sphere->GetX()+sphere->GetWidth()) &&
         (sphere->GetY() <= my && my <= sphere->GetY()+sphere->GetHeight())) {
-          sprintf(lolka, "%d_%d", i, j);
+          sprintf_s(lolka, 5, "%d_%d", i, j);
           std::string nameOfFile = "img\\" + nameOfSkill + (std::string)lolka + ".png";
           descImg.LoadFromFile(nameOfFile);
           desc = se::Sprite(sphere->GetX(), sphere->GetY()-descImg.GetHeight(), 0, 0, se::Color(), true);
