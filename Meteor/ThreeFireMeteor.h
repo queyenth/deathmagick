@@ -35,7 +35,7 @@ public:
       waveTimes++;
       window.Draw(&waveSprite);
     }
-    if (!fire->operation()) {
+    else if (!fire->operation()) {
       waveTime = true;
       waveSprite.SetY(fire->base->base->GetY());
     }

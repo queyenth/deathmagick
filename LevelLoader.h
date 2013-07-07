@@ -17,7 +17,7 @@ public:
     se::Image playerImg;
     playerImg.LoadFromFile("img\\player.png");
     player.SetImage(playerImg);
-    Enemy enemy(0, 0, 0);
+    Enemy enemy(0, 0);
     enemy.SetImage(playerImg);
 
     nameOfLevel = "lvl\\" + nameOfLevel + ".txt";

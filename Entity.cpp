@@ -1,8 +1,16 @@
 #include "Entity.h"
 
-Entity::Entity(int x, int y, int maxJump) : PhysicsObject(x, y), inAir(STADING), maxJump(maxJump), currentJump(0), speed(3),
-  damage(se::Color(1.0f, 0.4f, 0.4f, 1.0f)),
-  stun(se::Color(0.6f, 0.6f, 0.6f, 1.0f)), freeze(se::Color(0.4f, 0.4f, 1.0f, 0.5f)) {}
+#include "DrawSomeTime.h"
+#include "String.hpp"
+#include "Font.h"
+
+extern std::vector<DrawSomeTime<se::String>> damageString;
+extern se::Font *font;
+
+Entity::Entity(int x, int y, int health, int experience, int speed, int maxJump) : PhysicsObject(x, y), inAir(STADING), health(health), experience(experience),
+ maxJump(maxJump), currentJump(0), speed(speed),
+ damage(se::Color(1.0f, 0.4f, 0.4f, 1.0f)),
+ stun(se::Color(0.6f, 0.6f, 0.6f, 1.0f)), freeze(se::Color(0.4f, 0.4f, 1.0f, 0.5f)) {}
 
 void Entity::TryToMove(int offsetX, int offsetY, std::vector<PhysicsObject *> floors) {
   if (!stun.UnderEffect()) {
@@ -64,6 +72,49 @@ void Entity::Tick(std::vector<PhysicsObject *> things) {
   case ONSTAIR:
     break;
   }
+}
+
+void Entity::Jump() {
+  if (inAir != STADING) return;
+  inAir = INAIR;
+  currentJump = maxJump;
+}
+
+void Entity::DamageHim(int damageSize) {
+  if (damage.UnderEffect()) return ;
+  if (health - damageSize <= 0)
+    health = 0;
+  else
+    health -= damageSize;
+  char text[5];
+  sprintf_s(text, 5, "%d", damageSize);
+  damageString.push_back(DrawSomeTime<se::String>(std::shared_ptr<se::String>(new se::String(text, font, x+GetWidth(), y+GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
+  damage.SetLong(500);
+  damage.MakeEffect();
+  SetColor(damage.GetColor());
+  lastEffect = &damage;
+}
+
+void Entity::Freeze(DWORD howLong) {
+  freeze.SetLong(howLong);
+  freeze.MakeEffect();
+  SetColor(freeze.GetColor());
+  lastEffect = &freeze;
+}
+
+void Entity::Stun(DWORD howLong) {
+  stun.SetLong(howLong);
+  stun.MakeEffect();
+  SetColor(stun.GetColor());
+  lastEffect = &stun;
+}
+
+bool Entity::IsAlive() const {
+  return health != 0;
+}
+
+int Entity::GetHealth() const {
+  return health;
 }
 
 bool Entity::CheckCollision(PhysicsObject *other) {

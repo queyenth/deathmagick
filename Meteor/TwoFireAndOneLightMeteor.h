@@ -11,22 +11,21 @@ public:
   }
 
   virtual void Cast(Player &player) override {
-    fire->Cast(player);
+    light->Cast(player);
     fire->base->base->speed = light->base->speed;
   }
 
   virtual bool operation() override {
+    // making light, then it fall, it return 
     if (!fire->base->FireTime) {
-      fire->operation();
-      if (fire->base->FireTime) {
-        light->base = fire->base->base;
-        light->operation();
+      if (!light->operation()) {
+        fire->base->FireTime = true;
+        fire->base->base = light->base;
       }
       return true;
     }
-    else {
+    else
       return fire->operation();
-    }
   }
 
   se::Image fireImage;

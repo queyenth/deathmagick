@@ -5,40 +5,36 @@
 
 class Player : public Entity {
 public:
-  Player(int x, int y, unsigned int exp) : Entity(x, y), experience(exp), health(100), damageTime(0) {}
-  Player() : Entity(0, 0), experience(0), health(100), damageTime(0) {}
+  Player(int x, int y, unsigned int exp) : Entity(x, y, 100, exp) {}
+  Player() : Entity(0, 0, 100, 0) {}
   virtual ~Player() {}
-  void Jump() {
-    if (inAir != STADING) return;
-    inAir = INAIR;
-    currentJump = maxJump;
+
+  void DrawHealth(se::Window &window) const {
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glTranslatef(0.0f, (float)window.GetHeight(), 0.0f);
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glPointSize(15);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_POINT_SMOOTH);
+    glBegin(GL_POINTS);
+    int points = GetHealth()/1.25;
+    for (int i = 0; i < points; i++) {
+      glVertex2f(190*cosf((275+i)*3.14/180), 190*sinf((275+i)*3.14/180));
+    }
+    glEnd();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
   }
 
   virtual void Tick(std::vector<PhysicsObject *> things) override {
-    damage.CheckEffect();
-    freeze.CheckEffect();
-    stun.CheckEffect();
+    SetColor(se::Color());
+    if (!damage.CheckEffect() && !freeze.CheckEffect() && !stun.CheckEffect()) {
+      lastEffect = nullptr;
+    }
+    else
+      SetColor(lastEffect->GetColor());
     Entity::Tick(things);
   }
 
-  void DamageHim(int damage) {
-	  if (health - damage <= 0)
-      health = 0;
-	  else
-	    health -= damage;
-    SetColor(se::Color(1.0f, 0.4f, 0.4f, 1.0f));
-    damageTime = GetTickCount();
-  }
-
-  bool IsAlive() const {
-    return health != 0;
-  }
-
-  int GetHealth() const {
-    return health;
-  }
-
-  unsigned int experience;
-  int health;
-  DWORD damageTime;
 };
