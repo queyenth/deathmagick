@@ -29,11 +29,12 @@ public:
         window.Draw(&iceSphereSprite);
         if (GetTickCount() - secondRemaining > 1000) {
           secondRemaining = GetTickCount();
-          for (auto i = enemies.begin(); i != enemies.end(); i++)
+          for (auto i = enemies.begin(); i != enemies.end(); i++) {
             if (i->CheckCollision(&iceSphereSprite)) {
               i->DamageHim(15);
               i->Freeze(5000);
             }
+          }
         }
       }
     }

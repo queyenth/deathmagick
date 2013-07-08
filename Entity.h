@@ -23,6 +23,7 @@ public:
   void Stun(DWORD howLong);
   bool IsAlive() const;
   int GetHealth() const;
+  void SetHealth(int health);
 
   bool CheckCollision(PhysicsObject *other) override;
 

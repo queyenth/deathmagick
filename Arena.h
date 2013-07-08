@@ -73,10 +73,23 @@ void InitArena() {
   ShowCursor(FALSE);
   LevelLoader loader;
   loader.LoadLevel("first", player, floors, enemies);
+  player.SetHealth(100);
+  player.experience = 0;
+  player.animation[Player::IDLE].AddFrame("img\\Player0.png");
+  player.animation[Player::IDLE].SetLoop(true);
+
+  player.animation[Player::WALKING].AddFrame("img\\Player1.png");
+  player.animation[Player::WALKING].AddFrame("img\\Player0.png");
+  player.animation[Player::WALKING].AddFrame("img\\Player2.png");
+  player.animation[Player::WALKING].AddFrame("img\\Player0.png");
+  player.animation[Player::WALKING].SetSpeed(200);
+  player.animation[Player::WALKING].SetLoop(true);
+
   InitBackgrounds();
   InitStairs();
   InitSpheres();
   InitImprs();
+  camera.OffsetViewByX(player.GetX() - window.GetWidth()/3);
 }
 
 void DeinitArena() {
@@ -122,8 +135,10 @@ void DrawArena() {
     }
     if (player.inAir == Player::ONSTAIR)
       player.Move(0, 3);
-    else
+    else {
       player.Jump();
+      player.state = Player::JUMP;
+    }
   }
   else if (input.IsKeyPressed('S')) {
     if (player.inAir == Player::ONSTAIR)
@@ -142,10 +157,16 @@ void DrawArena() {
     player.FlipX(false);
   }
 
+  if (!moved) {
+    player.state = Player::IDLE;
+    player.animation[Player::WALKING].SetCurrentFrame(0);
+  }
+
   int middle = window.GetWidth()/3 + camera.GetViewX();
   if (player.GetX() <= window.GetWidth()/3)
     camera.SetViewPoint(se::Vertex2D(0, 0));
   else if (moved) {
+    player.state = Player::WALKING;
     camera.OffsetViewByX(player.GetX() - middle);
     if (destination == LEFT) {
       for (int i = 0; i < 30; i++)
@@ -172,6 +193,8 @@ void DrawArena() {
   }
   
   player.Tick(floors);
+  if (!player.IsAlive())
+    currentState = ARENA_DEINIT;
 
   damageString.erase(std::remove_if(damageString.begin(), damageString.end(), [](DrawSomeTime<se::String> t) { return GetTickCount() - t.firstTime > t.time; }), damageString.end());
   effects.erase(std::remove_if(effects.begin(), effects.end(), [](DrawSomeTime<Entity> t) { return GetTickCount() - t.firstTime > t.time; }), effects.end());
@@ -186,9 +209,6 @@ void DrawArena() {
   }
 
   window.Clear(se::Color(0.258f, 0.66f, 1.0f));
-
-  if (!player.IsAlive())
-    currentState = ARENA_DEINIT;
   
   // Drawing background
   for (int i = 0; i < 30; i++)
@@ -211,7 +231,7 @@ void DrawArena() {
   }*/
 
   // Drawing player
-  window.Draw(&player);
+  window.Draw(&player.animation[player.state]);
 
   // Drawing enemies
   for (auto i = enemies.begin(); i != enemies.end(); i++) {

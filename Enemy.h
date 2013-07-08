@@ -5,16 +5,18 @@
 #include "String.hpp"
 #include "Entity.h"
 #include "Window.hpp"
+#include "Player.h"
 
 #include <vector>
 
 extern std::vector<DrawSomeTime<se::String>> damageString;
 extern se::Font *font;
+extern Player player;
 
 class Enemy : public Entity {
 public:
   Enemy(int x, int y)
-    : Entity(x, y)
+    : Entity(x, y), moveSpeed(3), attackSpeed(3)
   {}
   Enemy() : Entity(0, 0)
   {}
@@ -29,11 +31,29 @@ public:
   // We need make AI FUCKING AWESOME
   void AITick(std::vector<PhysicsObject *> floors) {
     SetColor(se::Color());
-    if (!damage.CheckEffect() && !freeze.CheckEffect() && !stun.CheckEffect()) {
+    if (!damage.CheckEffect() && !freeze.CheckEffect() && !stun.CheckEffect())
       lastEffect = nullptr;
-    }
     else
       SetColor(lastEffect->GetColor());
+
+    if (!stun.UnderEffect()) {
+      // Here AI!
+      int move = freeze.UnderEffect() ? moveSpeed/2 : moveSpeed;
+      int px = player.GetX();
+      if (px < GetX()) {
+        this->Move(-move, 0);
+        this->FlipX(true);
+      }
+      else if (px > GetX()) {
+        this->Move(move, 0);
+        this->FlipX(false);
+      }
+    }
+    
+    if (CheckCollision(&player)) {
+      player.DamageHim(5);
+    }
+
     Tick(floors);
   }
 

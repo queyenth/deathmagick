@@ -2,9 +2,12 @@
 
 #include "Entity.h"
 #include "String.hpp"
+#include "Animation.h"
 
 class Player : public Entity {
 public:
+  enum State { IDLE, WALKING, JUMP, ALL };
+
   Player(int x, int y, unsigned int exp) : Entity(x, y, 100, exp) {}
   Player() : Entity(0, 0, 100, 0) {}
   virtual ~Player() {}
@@ -34,7 +37,12 @@ public:
     }
     else
       SetColor(lastEffect->GetColor());
+    animation[state].SetX(GetX());
+    animation[state].SetY(GetY()-5);
+    animation[state].FlipX(IsFlippedX());
     Entity::Tick(things);
   }
 
+  Animation animation[ALL];
+  State state;
 };

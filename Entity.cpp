@@ -117,6 +117,10 @@ int Entity::GetHealth() const {
   return health;
 }
 
+void Entity::SetHealth(int health) {
+  this->health = health;
+}
+
 bool Entity::CheckCollision(PhysicsObject *other) {
   int width = GetX() + GetWidth();
 	int height = GetY() + GetHeight();
