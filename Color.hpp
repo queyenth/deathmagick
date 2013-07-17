@@ -75,11 +75,26 @@ public:
 
   void SetAlpha(float a);
 
-  bool operator==(Color right) {
-    if (this->r == right.r && this->g == right.g && this->b == right.b && this->a == right.a)
+  bool operator==(Color &right) {
+    if (r == right.r && g == right.g && b == right.b && a == right.a)
       return true;
     else
       return false;
+  }
+
+  void operator*(Color &right) {
+    r *= right.r;
+    g *= right.g;
+    b *= right.b;
+    a *= right.a;
+  }
+
+  friend se::Color &operator*=(se::Color &left, se::Color &right) {
+    left.r *= right.r;
+    left.g *= right.g;
+    left.b *= right.b;
+    left.a *= right.a;
+    return left;
   }
 
   /**

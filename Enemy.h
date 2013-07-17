@@ -15,11 +15,16 @@ extern Player player;
 
 class Enemy : public Entity {
 public:
-  Enemy(int x, int y)
-    : Entity(x, y), moveSpeed(3), attackSpeed(3)
-  {}
-  Enemy() : Entity(0, 0)
-  {}
+  Enemy(int x, int y) : Entity(x, y) {
+    speed = 3;
+    attackSpeed = 1000/3;
+    lastAttack = 0;
+  }
+  Enemy() : Entity(0, 0) {
+    attackSpeed = 1000/3;
+    speed = 3;
+    lastAttack = 0;
+  }
   virtual ~Enemy() {}
 
   void DrawHealth(se::Window &window) const override {
@@ -30,15 +35,9 @@ public:
 
   // We need make AI FUCKING AWESOME
   void AITick(std::vector<PhysicsObject *> floors) {
-    SetColor(se::Color());
-    if (!damage.CheckEffect() && !freeze.CheckEffect() && !stun.CheckEffect())
-      lastEffect = nullptr;
-    else
-      SetColor(lastEffect->GetColor());
-
     if (!stun.UnderEffect()) {
       // Here AI!
-      int move = freeze.UnderEffect() ? moveSpeed/2 : moveSpeed;
+      int move = freeze.UnderEffect() ? speed/2 : speed;
       int px = player.GetX();
       if (px < GetX()) {
         this->Move(-move, 0);
@@ -50,13 +49,14 @@ public:
       }
     }
     
-    if (CheckCollision(&player)) {
-      player.DamageHim(5);
+    if (CheckCollision(&player) && GetTickCount() - lastAttack > attackSpeed) {
+      player.DamageHim(Damage(Damage::PHYSICAL, 5));
+      lastAttack = GetTickCount();
     }
 
     Tick(floors);
   }
 
-  int moveSpeed;
   int attackSpeed;
+  DWORD lastAttack;
 };

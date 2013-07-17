@@ -5,7 +5,10 @@
 class ThreeIceMeteor : public Meteor {
   std::shared_ptr<Meteor> base;
 public:
-  ThreeIceMeteor() : base(new BaseMeteor()) { sphereTime = false; }
+  ThreeIceMeteor() : base(new BaseMeteor()) {
+    sphereTime = false;
+    damage = Damage(Damage::ICE, 25);
+  }
 
   virtual void Cast(Player &player) override {
     base->Cast(player);
@@ -31,15 +34,21 @@ public:
           secondRemaining = GetTickCount();
           for (auto i = enemies.begin(); i != enemies.end(); i++) {
             if (i->CheckCollision(&iceSphereSprite)) {
-              i->DamageHim(15);
+              i->DamageHim(damage);
               i->Freeze(5000);
             }
           }
         }
       }
     }
-    if (!base->operation())
+    if (!base->operation()) {
       sphereTime = true;
+      int left = base->GetX() - base->GetRange();
+      int right = base->GetX() + base->GetWidth() + base->GetRange();
+      for (auto i = enemies.begin(); i != enemies.end(); i++)
+        if (left <= i->GetX() && i->GetX()+i->GetWidth() <= right)
+          i->Freeze(5000);
+    }
     return true;
   }
 

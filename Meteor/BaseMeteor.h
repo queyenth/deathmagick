@@ -3,6 +3,8 @@
 #include "..\Meteor.h"
 #include "..\GlobalObject.h"
 
+#include <algorithm>
+
 class BaseMeteor : public Meteor {
 public:
   BaseMeteor() : Meteor() {speedX = speedY = speed;}
@@ -13,13 +15,14 @@ public:
         int left = GetX() - GetRange();
         int right = GetX() + GetWidth() + GetRange();
         for (auto it = enemies.begin(); it != enemies.end(); it++)
-          if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right)
-            it->DamageHim(GetDamage());
+          if (left <= it->GetX() && it->GetX() + it->GetWidth() <= right && !IsShoted(&*it)) {
+            it->DamageHim(damage);
+            shoted.push_back(&*it);
+          }
         isDrawing = false;
         break;
       }
     }
-    window.Draw(this);
     switch (destination) {
     case LEFT:
       Move(-speedX, -speedY);
@@ -30,6 +33,7 @@ public:
     default:
       break;
     }
+    window.Draw(this);
     return isDrawing;
   }
 

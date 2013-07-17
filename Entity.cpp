@@ -10,7 +10,10 @@ extern se::Font *font;
 Entity::Entity(int x, int y, int health, int experience, int speed, int maxJump) : PhysicsObject(x, y), inAir(STADING), health(health), experience(experience),
  maxJump(maxJump), currentJump(0), speed(speed),
  damage(se::Color(1.0f, 0.4f, 0.4f, 1.0f)),
- stun(se::Color(0.6f, 0.6f, 0.6f, 1.0f)), freeze(se::Color(0.4f, 0.4f, 1.0f, 0.5f)) {}
+ stun(se::Color(0.6f, 0.6f, 0.6f, 1.0f)), freeze(se::Color(0.4f, 0.4f, 1.0f, 0.5f)) {
+  for (int i = 0; i < Damage::ALL; i++)
+    immunity[i] = false;
+}
 
 void Entity::TryToMove(int offsetX, int offsetY, std::vector<PhysicsObject *> floors) {
   if (!stun.UnderEffect()) {
@@ -33,6 +36,15 @@ void Entity::TryToMove(int offsetX, int offsetY, std::vector<PhysicsObject *> fl
 
 void Entity::Tick(std::vector<PhysicsObject *> things) {
   bool floorUnderFoot = false;
+
+  se::Color result;
+  if (stun.CheckEffect())
+    result *= stun.GetColor();
+  if (freeze.CheckEffect())
+    result *= freeze.GetColor();
+  if (damage.CheckEffect())
+    result *= damage.GetColor();
+  SetColor(result);
   switch (inAir) {
   case STADING:
     SetY(y - G);
@@ -80,33 +92,26 @@ void Entity::Jump() {
   currentJump = maxJump;
 }
 
-void Entity::DamageHim(int damageSize) {
-  if (damage.UnderEffect()) return ;
-  if (health - damageSize <= 0)
+void Entity::DamageHim(Damage damage) {
+  if (health - damage.damage <= 0)
     health = 0;
   else
-    health -= damageSize;
+    health -= damage.damage;
   char text[5];
-  sprintf_s(text, 5, "%d", damageSize);
+  sprintf_s(text, 5, "%d", damage.damage);
   damageString.push_back(DrawSomeTime<se::String>(std::shared_ptr<se::String>(new se::String(text, font, x+GetWidth(), y+GetHeight(), se::Color(1.0f, 1.0f, 1.0f), false)), 1000));
-  damage.SetLong(500);
-  damage.MakeEffect();
-  SetColor(damage.GetColor());
-  lastEffect = &damage;
+  this->damage.SetLong(500);
+  this->damage.MakeEffect();
 }
 
 void Entity::Freeze(DWORD howLong) {
   freeze.SetLong(howLong);
   freeze.MakeEffect();
-  SetColor(freeze.GetColor());
-  lastEffect = &freeze;
 }
 
 void Entity::Stun(DWORD howLong) {
   stun.SetLong(howLong);
   stun.MakeEffect();
-  SetColor(stun.GetColor());
-  lastEffect = &stun;
 }
 
 bool Entity::IsAlive() const {

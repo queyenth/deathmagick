@@ -8,6 +8,7 @@ public:
   
   OneFireMeteor() : base(new BaseMeteor()) {
     movedDistance = 0; FireTime = false;
+    damage.damage = 25;
   }
   
   virtual void Cast(Player &player) override {
@@ -24,7 +25,6 @@ public:
       movedDistance = 0;
       return false;
     }
-    window.Draw(base.get());
     if (base->destination == LEFT) {
       base->Rotate(8);
       base->Move(-base->speed, 0);
@@ -35,8 +35,11 @@ public:
     }
     movedDistance += base->speed;
     for (auto it = enemies.begin(); it != enemies.end(); it++)
-      if (it->CheckCollision(base.get()))
-        it->DamageHim(GetDamage());
+      if (it->CheckCollision(base.get()) && !IsShoted(&*it)) {
+        it->DamageHim(damage);
+        shoted.push_back(&*it);
+      }
+    window.Draw(base.get());
     return true;
   }
 

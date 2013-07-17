@@ -10,25 +10,24 @@ public:
     range = 200;
     countOfFrames = 0;
     iceMaking = false;
-    damage = 25;
+    damage.damage = 25;
   }
 
   virtual void Cast(Player &player) override {
     base->Cast(player);
+    iceFromLandImage.LoadFromFile("img\\ice_from_lang.png");
+    iceFromLand.SetImage(iceFromLandImage);
   }
 
   virtual bool operation() override {
     if (!iceMaking) {
-      if (!base->operation())
+      if (!base->operation()) {
         iceMaking = true;
+        iceFromLand.SetY(base->base->GetY() - iceFromLandImage.GetWidth());
+      }
     }
     else {
       Meteor *meteor = base->base.get();
-      if (!iceFromLandImage.IsValid()) {
-        iceFromLandImage.LoadFromFile("img\\ice_from_lang.png");
-        iceFromLand.SetImage(iceFromLandImage);
-        iceFromLand.SetY(meteor->GetY() - iceFromLandImage.GetWidth());
-      }
       iceFromLand.Move(0, 1);
       int left = meteor->GetX() - GetRange();
       int right = meteor->GetX() + meteor->GetWidth() + GetRange();

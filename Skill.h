@@ -6,14 +6,14 @@ class Skill : public Entity {
 public:
   enum Destination { UP, DOWN, RIGHT, LEFT };
 
-  Skill() : Entity(0, 0), damage(0), range(0), casting(false) {}
-  Skill(int x, int y, int damage, int range) : Entity(x, y), damage(damage), range(range), casting(false) { }
+  Skill() : Entity(0, 0), damage(Damage::PHYSICAL, 0), range(0), casting(false) {}
+  Skill(int x, int y, int damage, int range) : Entity(x, y), damage(Damage::PHYSICAL, damage), range(range), casting(false) { }
   virtual ~Skill() {}
 
   virtual void Cast(Player &) = 0;
   virtual bool operation() = 0;
   
-  virtual int GetDamage() {
+  virtual Damage GetDamage() {
     return damage;
   }
   
@@ -21,8 +21,8 @@ public:
     return range;
   }
 
-  bool casting;
-  int damage;
+  Damage damage;
   int range;
+  bool casting;
   Destination destination;
 };

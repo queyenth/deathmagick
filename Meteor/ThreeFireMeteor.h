@@ -12,6 +12,7 @@ public:
     waveImage.LoadFromFile("img\\sphere.png");
     waveSprite.SetImage(waveImage);
     waveSprite.SetColor(se::Color(1.0f, 1.0f, 1.0f, 0.7f));
+    damage.damage = 200;
   }
 
   virtual void Cast(Player &player) override {
@@ -26,7 +27,7 @@ public:
         int right = waveSprite.GetX()+waveSprite.GetWidth()-10;
         for (auto it = enemies.begin(); it != enemies.end(); it++)
           if (left <= it->GetX() && it->GetX()+it->GetWidth() <= right)
-            it->DamageHim(200);
+            it->DamageHim(damage);
         return false;
       }
       waveSprite.SetWidth(50+waveTimes*8);

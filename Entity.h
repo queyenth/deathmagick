@@ -3,6 +3,7 @@
 #include "PhysicsObject.h"
 #include "EntityEffect.h"
 #include "Window.hpp"
+#include "Damage.h"
 
 #include <vector>
 
@@ -18,7 +19,7 @@ public:
   virtual void DrawHealth(se::Window &window) const {};
 
   void Jump();
-  void DamageHim(int damageSize);
+  void DamageHim(Damage damage);
   void Freeze(DWORD howLong);
   void Stun(DWORD howLong);
   bool IsAlive() const;
@@ -31,9 +32,10 @@ public:
   Effect freeze;
   Effect damage;
   Effect stun;
-  Effect *lastEffect;
   int speed;
   int experience;
+  bool immunity[Damage::ALL];
+  vector<Damage> damages;
 protected:
   int maxJump;
   int currentJump;

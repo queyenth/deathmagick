@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Skill.h"
+#include "Enemy.h"
+
+#include <vector>
+#include <algorithm>
 
 class Meteor : public Skill {
 public:
@@ -29,6 +33,13 @@ public:
     FlipX(player.IsFlippedX());
   }
 
+  bool IsShoted(Enemy *enemy) {
+    if (std::find(shoted.begin(), shoted.end(), enemy) != shoted.end())
+      return true;
+    return false;
+  }
+
   bool imageLoaded;
   bool isDrawing;
+  std::vector<Enemy *> shoted;
 };

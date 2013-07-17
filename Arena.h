@@ -75,14 +75,14 @@ void InitArena() {
   loader.LoadLevel("first", player, floors, enemies);
   player.SetHealth(100);
   player.experience = 0;
-  player.animation[Player::IDLE].AddFrame("img\\Player0.png");
+  player.animation[Player::IDLE].AddFrame("img\\Player3.png");
   player.animation[Player::IDLE].SetLoop(true);
 
   player.animation[Player::WALKING].AddFrame("img\\Player1.png");
   player.animation[Player::WALKING].AddFrame("img\\Player0.png");
   player.animation[Player::WALKING].AddFrame("img\\Player2.png");
   player.animation[Player::WALKING].AddFrame("img\\Player0.png");
-  player.animation[Player::WALKING].SetSpeed(200);
+  player.animation[Player::WALKING].SetSpeed(100);
   player.animation[Player::WALKING].SetLoop(true);
 
   InitBackgrounds();
@@ -101,8 +101,7 @@ void DeinitArena() {
   floors.clear();
 }
 
-void DrawArena() {
-
+void UpdateAll() {
   int castType = 0;
 
   // Handle keys here
@@ -207,7 +206,9 @@ void DrawArena() {
   for (auto i = enemies.begin(); i != enemies.end(); i++) {
     i->AITick(floors);
   }
+}
 
+void DisplayAll() {
   window.Clear(se::Color(0.258f, 0.66f, 1.0f));
   
   // Drawing background
@@ -235,7 +236,7 @@ void DrawArena() {
 
   // Drawing enemies
   for (auto i = enemies.begin(); i != enemies.end(); i++) {
-	  window.Draw(&*i);
+    window.Draw(&*i);
     i->DrawHealth(window);
   }
     
@@ -267,13 +268,39 @@ void DrawArena() {
     if (i->entity != nullptr) {
       for (auto j = enemies.begin(); j != enemies.end(); j++)
         if (j->CheckCollision(i->entity.get()))
-          j->DamageHim(12);
+          j->DamageHim(Damage(Damage::PHYSICAL, 12));
       window.Draw(i->entity.get());
     }
 
-
   window.Display();
+}
 
-  // For 60 FPS
-  Sleep(15);
+DWORD beginTime;
+DWORD timeDiff;
+int sleepTime;
+int framesSkipped;
+
+void DrawArena() {
+  static const int MAX_FPS = 60;
+  static const int MAX_FRAME_SKIPS = 5;
+  static const int FRAME_PERIOD = 1000 / MAX_FPS;
+  
+  while (currentState == ARENA_PLAY) {
+    window.ProcessEvents();
+
+    beginTime = GetTickCount();
+    framesSkipped = 0;
+    UpdateAll();
+    DisplayAll();
+    timeDiff = GetTickCount() - beginTime;
+    sleepTime = FRAME_PERIOD - timeDiff;
+    if (sleepTime > 0) {
+      Sleep(sleepTime);
+    }
+    while (sleepTime < 0 && framesSkipped < MAX_FRAME_SKIPS) {
+      UpdateAll();
+      sleepTime += FRAME_PERIOD;
+      framesSkipped++;
+    }
+  }
 }

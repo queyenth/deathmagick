@@ -31,16 +31,11 @@ public:
   }
 
   virtual void Tick(std::vector<PhysicsObject *> things) override {
-    SetColor(se::Color());
-    if (!damage.CheckEffect() && !freeze.CheckEffect() && !stun.CheckEffect()) {
-      lastEffect = nullptr;
-    }
-    else
-      SetColor(lastEffect->GetColor());
+    Entity::Tick(things);
     animation[state].SetX(GetX());
     animation[state].SetY(GetY()-5);
     animation[state].FlipX(IsFlippedX());
-    Entity::Tick(things);
+    animation[state].SetColor(GetColor());
   }
 
   Animation animation[ALL];
