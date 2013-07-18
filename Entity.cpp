@@ -93,6 +93,8 @@ void Entity::Jump() {
 }
 
 void Entity::DamageHim(Damage damage) {
+  if (immunity[damage.GetType()])
+    return;
   if (health - damage.damage <= 0)
     health = 0;
   else
