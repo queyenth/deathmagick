@@ -15,7 +15,7 @@ Entity::Entity(int x, int y, int health, int experience, int speed, int maxJump)
     immunity[i] = false;
 }
 
-void Entity::TryToMove(int offsetX, int offsetY, std::vector<PhysicsObject *> floors) {
+bool Entity::TryToMove(int offsetX, int offsetY, std::vector<PhysicsObject *> floors) {
   if (!stun.UnderEffect()) {
     int speedX = !freeze.UnderEffect() ? speed*offsetX : speed*offsetX/2;
     int speedY = !freeze.UnderEffect() ? speed*offsetY : speed*offsetY/2;
@@ -31,7 +31,9 @@ void Entity::TryToMove(int offsetX, int offsetY, std::vector<PhysicsObject *> fl
       canMove = false;
     if (!canMove)
       this->Move(-speedX, -speedY);
+    return canMove;
   }
+  return false;
 }
 
 void Entity::Tick(std::vector<PhysicsObject *> things) {
@@ -45,6 +47,7 @@ void Entity::Tick(std::vector<PhysicsObject *> things) {
   if (damage.CheckEffect())
     result *= damage.GetColor();
   SetColor(result);
+
   switch (inAir) {
   case STADING:
     SetY(y - G);

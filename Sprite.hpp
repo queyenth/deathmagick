@@ -54,7 +54,7 @@ public:
   }
 
 protected:
-  Image image;
+  mutable Image image;
 
 private:
   /**
@@ -62,7 +62,7 @@ private:
    *
    * Рисует спрайт с наложенным изображением
    */
-  void Render() const;
+  virtual void Render() const;
 };
 
 }

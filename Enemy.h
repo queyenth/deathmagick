@@ -25,7 +25,7 @@ public:
     speed = 3;
     lastAttack = 0;
   }
-  virtual ~Enemy() {}
+virtual ~Enemy() {}
 
   void DrawHealth(se::Window &window) const override {
     int width = GetHealth() * GetWidth()/100;

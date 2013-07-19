@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Impr.h"
+#include "Stair.h"
 
 enum GameState {
 	MENU_INIT, MENU, SETTINGS, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT
@@ -30,3 +31,7 @@ std::vector<DrawSomeTime<se::String>> damageString;
 std::vector<DrawSomeTime<Entity>> effects;
 se::Sprite arrow;
 se::Image arrowImg;
+std::vector<Stair> stairs;
+se::Image stairImg;
+std::vector<se::Sprite> runes;
+se::Image runeImg;

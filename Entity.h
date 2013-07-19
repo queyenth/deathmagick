@@ -14,7 +14,7 @@ public:
   Entity(int x = 0, int y = 0, int health = 100, int experience = 0, int speed = 3, int maxJump = 30);
   virtual ~Entity() { }
   
-  virtual void TryToMove(int offsetX, int offsetY, std::vector<PhysicsObject *> floors);
+  virtual bool TryToMove(int offsetX, int offsetY, std::vector<PhysicsObject *> floors);
   virtual void Tick(std::vector<PhysicsObject *> things);
   virtual void DrawHealth(se::Window &window) const {};
 

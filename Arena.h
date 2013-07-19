@@ -15,9 +15,6 @@ se::Sprite spheres[3];
 bool k1p, k2p, k3p;
 bool castingSkill = false;
 KeySphere currentSphere;
-se::Sprite stair(880, window.GetHeight()/4);
-se::Image stairImage;
-int stairHeight;
 int angles[3];
 se::Sprite clouds[30];
 se::Image cloudImage;
@@ -25,12 +22,6 @@ std::vector<std::shared_ptr<Skill>> skillsOnFrame;
 bool moved = false;
 se::Image interfaceImg;
 se::Sprite interfaceS;
-
-void InitStairs() {
-  //stairImage.LoadFromFile("img\\stair.png");
-  //stair.SetImage(stairImage);
-  //stairHeight = floors[2].GetY()+floors[2].GetHeight()+10-window.GetHeight()/4;
-}
 
 void InitBackgrounds() {
   cloudImage.LoadFromFile("img\\cloud.png");
@@ -72,7 +63,7 @@ void InitImprs() {
 void InitArena() {
   ShowCursor(FALSE);
   LevelLoader loader;
-  loader.LoadLevel("first", player, floors, enemies);
+  loader.LoadLevel("first");
   player.SetHealth(100);
   player.experience = 0;
   player.animation[Player::IDLE].AddFrame("img\\Player3.png");
@@ -86,7 +77,7 @@ void InitArena() {
   player.animation[Player::WALKING].SetLoop(true);
 
   InitBackgrounds();
-  InitStairs();
+  stairImg.LoadFromFile("img\\stair.png");
   InitSpheres();
   InitImprs();
   camera.OffsetViewByX(player.GetX() - window.GetWidth()/3);
@@ -124,39 +115,45 @@ void UpdateAll() {
     return;
   }
 
+  bool onStair = false;
   if (input.IsKeyPressed('W')) {
-    if (stair.GetX() <= player.GetX() && player.GetX() <= stair.GetX() + stair.GetWidth()
-        && stair.GetY()-stairHeight <= player.GetY() && player.GetY() <= stair.GetY()) {
-      player.inAir = Player::ONSTAIR;
+    for (auto i = stairs.begin(); i != stairs.end(); i++) {
+      if (i->x-30 <= player.GetX() && player.GetX() <= i->x+30
+      && i->startY <= player.GetY() && player.GetY() <= i->startY+i->count*10) {
+        onStair = true;
+        player.Move(0, 3);
+        player.inAir = Player::ONSTAIR;
+        break;
+      }
     }
-    else if (player.inAir == Player::ONSTAIR) {
-      player.inAir = Player::STADING;
-    }
-    if (player.inAir == Player::ONSTAIR)
-      player.Move(0, 3);
-    else {
-      player.Jump();
-      player.state = Player::JUMP;
+    if (!onStair) {
+      if (player.inAir == Player::ONSTAIR) {
+        player.inAir = Player::STADING;
+      }
+      else {
+        player.Jump();
+      }
     }
   }
-  else if (input.IsKeyPressed('S')) {
-    if (player.inAir == Player::ONSTAIR)
-      player.Move(0, -3);
-  }
+
   if (input.IsKeyPressed('A')) {
-    player.TryToMove(-1, 0, floors);
-    destination = LEFT;
-    moved = true;
-    player.FlipX(true);
+    if (player.TryToMove(-1, 0, floors)) {
+      destination = LEFT;
+      moved = true;
+      player.FlipX(true);
+    }
   }
   else if (input.IsKeyPressed('D')) {
-    player.TryToMove(1, 0, floors);
-    destination = RIGHT;
-    moved = true;
-    player.FlipX(false);
+    if (player.TryToMove(1, 0, floors)) {
+      destination = RIGHT;
+      moved = true;
+      player.FlipX(false);
+    }
   }
 
   if (!moved) {
+    if (player.inAir == Player::ONSTAIR)
+      player.inAir = Player::STADING;
     player.state = Player::IDLE;
     player.animation[Player::WALKING].SetCurrentFrame(0);
   }
@@ -226,10 +223,19 @@ void DisplayAll() {
     window.Draw(*i);
   
   // Drawing stairs
-  /*for (int i = 0; i <= stairHeight; i+=10) {
-    stair.SetY(window.GetHeight()/4+i);
-    window.Draw(&stair);
-  }*/
+  
+  for (auto i = stairs.begin(); i != stairs.end(); i++) {
+    se::Sprite stair(i->x);
+    stair.SetImage(stairImg);
+    for (int j = 0; j < i->count; j++) {
+      stair.SetY(i->startY+j*10);
+      window.Draw(&stair);
+    }
+  }
+
+  // Drawing runes
+  for (auto i = runes.begin(); i != runes.end(); i++)
+    window.Draw(&*i);
 
   // Drawing player
   window.Draw(&player.animation[player.state]);
