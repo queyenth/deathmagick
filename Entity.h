@@ -26,7 +26,7 @@ public:
   int GetHealth() const;
   void SetHealth(int health);
 
-  bool CheckCollision(PhysicsObject *other) override;
+  bool CheckCollision(PhysicsObject *other) const override;
 
   State inAir;
   Effect freeze;

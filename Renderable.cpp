@@ -158,16 +158,11 @@ bool Renderable::IsFixed() const {
  * @param camera : ссылка на камеру
  */
 void Renderable::Draw(Camera &camera) const {
-  // Переходим к матрице модели
-  glMatrixMode(GL_MODELVIEW);
-
-  // Сохраняем предыдущую матрицу
-  glPushMatrix();
-
   // Если положение объекта изменилось, или изменилась камера, МОДИФИЦИРУЕМ МАТРИЦУ FUCK YEAH
   if (camera.Changed() || positionChanged) {
     int newX = isFixed ? x+width/2 : x+width/2 - camera.GetViewX();
     int newY = isFixed ? y+height/2 : y+height/2 - camera.GetViewY();
+
     // Сразу вычисляем косинус и синус, ибо дорогостоящая операция
     float Cos = cosf(angle*(float)(3.14159265/180));
     float Sin = sinf(angle*(float)(3.14159265/180));
@@ -182,6 +177,12 @@ void Renderable::Draw(Camera &camera) const {
     
     positionChanged = false;
   }
+
+  // Переходим к матрице модели
+  glMatrixMode(GL_MODELVIEW);
+
+  // Сохраняем предыдущую матрицу
+  glPushMatrix();
 
   // Перемножаем текущую матрицу с матрицей рисуемого объекта
   glMultMatrixf(matrix.GetMatrix());

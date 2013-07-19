@@ -14,7 +14,7 @@ public:
     SetHeight(3);
   }
 
-  bool CheckCollision(PhysicsObject *other) override {
+  bool CheckCollision(PhysicsObject *other) const override {
     if (other->GetY() <= y+2 && other->GetX() > x1 && other->GetX() < x2) {
       other->SetY(y+2);
       return true;

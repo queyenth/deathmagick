@@ -7,5 +7,5 @@ public:
   PhysicsObject(int x = 0, int y = 0);
   virtual ~PhysicsObject() {}
   
-  virtual bool CheckCollision(PhysicsObject *other) = 0;
+  virtual bool CheckCollision(PhysicsObject *other) const = 0;
 };

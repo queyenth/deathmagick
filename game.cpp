@@ -79,6 +79,7 @@ int main() {
     case MENU_INIT:
       font = new se::Font(window.GetDC(), L"Arial Cyr", 18);
       menuFont = new se::Font(window.GetDC(), L"Arial Cyr", 28);
+      fontForText = new se::Font(window.GetDC(), L"Arial Cyr", 10);
       backimage.LoadFromFile("img\\back.png");
       backMenu.SetImage(backimage);
       InitMenuImages();
@@ -111,6 +112,7 @@ int main() {
   DeinitArena();
   delete font;
   delete menuFont;
+  delete fontForText;
   #ifdef _DEBUG
   _CrtMemDumpAllObjectsSince(&_ms);
   #endif

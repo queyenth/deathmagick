@@ -8,6 +8,7 @@
 #include "Enemy.h"
 #include "Impr.h"
 #include "Stair.h"
+#include "Table.h"
 
 enum GameState {
 	MENU_INIT, MENU, SETTINGS, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT
@@ -20,6 +21,7 @@ se::Input &input = window.GetInput();
 se::Camera &camera = window.GetCamera();
 se::Font *font;
 se::Font *menuFont;
+se::Font *fontForText;
 std::vector<tagIMPR> imprs;
 se::Sprite backMenu;
 se::Image backimage;
@@ -35,3 +37,5 @@ std::vector<Stair> stairs;
 se::Image stairImg;
 std::vector<se::Sprite> runes;
 se::Image runeImg;
+std::vector<Table> tables;
+se::Image tableImg;

@@ -78,6 +78,7 @@ void InitArena() {
 
   InitBackgrounds();
   stairImg.LoadFromFile("img\\stair.png");
+  tableImg.LoadFromFile("img\\table.png");
   InitSpheres();
   InitImprs();
   camera.OffsetViewByX(player.GetX() - window.GetWidth()/3);
@@ -118,7 +119,7 @@ void UpdateAll() {
   bool onStair = false;
   if (input.IsKeyPressed('W')) {
     for (auto i = stairs.begin(); i != stairs.end(); i++) {
-      if (i->x-30 <= player.GetX() && player.GetX() <= i->x+30
+      if (i->x-15 <= player.GetX() && player.GetX() <= i->x+15
       && i->startY <= player.GetY() && player.GetY() <= i->startY+i->count*10) {
         onStair = true;
         player.Move(0, 3);
@@ -132,6 +133,17 @@ void UpdateAll() {
       }
       else {
         player.Jump();
+      }
+    }
+  }
+  else if (input.IsKeyPressed('S')) {
+    for (auto i = stairs.begin(); i != stairs.end(); i++) {
+      if (i->x-15 <= player.GetX() && player.GetX() <= i->x+15
+      && i->startY <= player.GetY() && player.GetY() <= i->startY+i->count*10) {
+        onStair = true;
+        player.Move(0, -3);
+        player.inAir = Player::ONSTAIR;
+        break;
       }
     }
   }
@@ -159,8 +171,13 @@ void UpdateAll() {
   }
 
   int middle = window.GetWidth()/3 + camera.GetViewX();
-  if (player.GetX() <= window.GetWidth()/3)
+  if (player.GetX() <= window.GetWidth()/3) {
     camera.SetViewPoint(se::Vertex2D(0, 0));
+    if (moved) {
+      player.state = Player::WALKING;
+      moved = false;
+    }
+  }
   else if (moved) {
     player.state = Player::WALKING;
     camera.OffsetViewByX(player.GetX() - middle);
@@ -172,7 +189,6 @@ void UpdateAll() {
       for (int i = 0; i < 30; i++)
         clouds[i].Move(-1, 0);
     }
-    
     moved = false;
   }
   
@@ -230,6 +246,16 @@ void DisplayAll() {
     for (int j = 0; j < i->count; j++) {
       stair.SetY(i->startY+j*10);
       window.Draw(&stair);
+    }
+  }
+
+  for (auto i = tables.begin(); i != tables.end(); i++) {
+    se::Sprite table(i->x, i->y);
+    table.SetImage(tableImg);
+    window.Draw(&table);
+    if (table.GetX()-table.GetWidth()/2 <= player.GetX() && player.GetX() <= table.GetX() + table.GetWidth()/2) {
+      se::String string(i->text, fontForText, i->x, i->y+100, se::Color(0.0f, 0.0f, 0.0f), false);
+      window.Draw(&string);
     }
   }
 
