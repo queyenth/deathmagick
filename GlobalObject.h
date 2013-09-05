@@ -8,7 +8,6 @@
 #include "Enemy.h"
 #include "Impr.h"
 #include "Stair.h"
-#include "Table.h"
 
 enum GameState {
 	MENU_INIT, MENU, SETTINGS, PAUSE, ARENA_INIT, ARENA_DEINIT, ARENA_PLAY, GAME_MENU, SKILLS, QUIT
@@ -37,5 +36,4 @@ std::vector<Stair> stairs;
 se::Image stairImg;
 std::vector<se::Sprite> runes;
 se::Image runeImg;
-std::vector<Table> tables;
 se::Image tableImg;

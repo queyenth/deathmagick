@@ -249,16 +249,6 @@ void DisplayAll() {
     }
   }
 
-  for (auto i = tables.begin(); i != tables.end(); i++) {
-    se::Sprite table(i->x, i->y);
-    table.SetImage(tableImg);
-    window.Draw(&table);
-    if (table.GetX()-table.GetWidth()/2 <= player.GetX() && player.GetX() <= table.GetX() + table.GetWidth()/2) {
-      se::String string(i->text, fontForText, i->x, i->y+100, se::Color(0.0f, 0.0f, 0.0f), false);
-      window.Draw(&string);
-    }
-  }
-
   // Drawing runes
   for (auto i = runes.begin(); i != runes.end(); i++)
     window.Draw(&*i);

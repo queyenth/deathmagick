@@ -78,9 +78,7 @@ public:
         break;
       // 5 x y text
       case TABLE:
-        std::string text;
-        level >> x >> y >> text;
-        tables.push_back(Table(text, x, y));
+        // TODO: Do table;
         break;
       }
     }
