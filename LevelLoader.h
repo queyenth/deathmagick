@@ -79,6 +79,8 @@ public:
       // 5 x y text
       case TABLE:
         // TODO: Do table;
+        std::string text;
+        level >> x >> y >> text;
         break;
       }
     }
